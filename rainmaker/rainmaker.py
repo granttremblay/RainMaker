@@ -14,6 +14,7 @@ def main():
     args = parser.parse_args()
 
 
+
 def is_valid_file(parser, arg):
     if not os.path.isfile(arg):
         parser.error("Cannot find that data table: %s" % arg)
