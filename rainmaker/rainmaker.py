@@ -2,6 +2,7 @@
 
 import sys, os
 import argparse
+import numpy as np
 
 
 def main():
@@ -12,7 +13,11 @@ def main():
                     help="input file with data", metavar="FILE",
                     type=lambda x: is_valid_file(parser, x))
     args = parser.parse_args()
+    filename = args.filename.name
 
+    dirtytable = parse_data_table(filename)
+    print(dirtytable)
+    
 
 
 def is_valid_file(parser, arg):
@@ -22,13 +27,10 @@ def is_valid_file(parser, arg):
         print("Successfully found input file: %s" % arg)
         return open(arg, 'r')  # return an open file handle
 
+def parse_data_table(intable):
+    a = np.genfromtxt(intable, names=True)
+    return a
 
-
-def parse_input_table(input_table):
-    if os.path.isfile(input_table):
-        print("Found the input file: " + input_table)
-    else: 
-        sys.exit("I c ")
 
 
 def alive():
