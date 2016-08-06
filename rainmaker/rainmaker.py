@@ -17,8 +17,8 @@ def parse_arguments():
                         help="input file with data", metavar="FILE",
                         type=lambda x: is_valid_file(parser, x))
 
-    parser.add_argument("-n", "--name_of_cluster", dest="name_of_cluster", required=False,
-                        default='ABELL_2597', help="Name of the cluster, e.g. 'Abell 2597', 'ZWICKY_2701', etc.")
+    parser.add_argument("-n", "--name_of_cluster", dest="name_of_cluster", required=True,
+                        help="Name of the cluster, e.g. 'Abell 2597', 'ZWICKY_2701', etc.")
 
     args = parser.parse_args()
     filename = args.filename.name
