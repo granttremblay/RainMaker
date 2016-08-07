@@ -73,7 +73,8 @@ def parse_data_table(filename, cluster_name):
         masked_data = data[mask]
         return masked_data
 
-
+def populate_data_arrays(data):
+    
 
 
 
