@@ -1,5 +1,13 @@
 #!/usr/bin/env python
 
+'''
+Rainmaker fits log density and temperature profiles to the ACCEPT 
+tables from Cavagnolo et al. 
+
+-Grant Tremblay (Yale University)
+'''
+
+
 import sys, os
 import argparse
 import numpy as np
@@ -8,22 +16,14 @@ from astropy.io import ascii
 def main():
     filename, cluster_name = parse_arguments()
 
-    data = parse_data_table(filename, cluster_name)
+    data = filter_table_by_cluster(filename, cluster_name)
 
     print(data)
 
+
 def parse_arguments():
-    '''
-    Use argparse voodoo to parse command line arguments. 
-    It requires that the user input -f data_table.txt and -n name_of_cluster, 
-    where name_of_cluster can flexibly be entered as, e.g., "abell 2597" or 
-    "ABELL_2597". 
+    '''Set up and parse command line arguments.'''
 
-    If the given filename does not exist, or if the cluster name is not found 
-    in the table, it exits with an error. 
-
-    Calls is_valid_file()
-    '''
     parser = argparse.ArgumentParser(description="It's gonna rain...",
                                      usage="python rainmaker.py -f data_table.txt")
 
@@ -47,11 +47,8 @@ def parse_arguments():
     
 
 def is_valid_file(parser, arg):
-    '''
-    A simple check to ensure that the file given in the command line argument
-    actually exists. If not, exit with an error (should probably improve this by 
-    querying for a new filename instead of failing). 
-    '''
+    '''Check to ensure existence of the file given in the -f command line argument.'''
+
     if not os.path.isfile(arg):
         parser.error("Cannot find that data table: %s" % arg)
     else:
@@ -59,7 +56,10 @@ def is_valid_file(parser, arg):
         return open(arg, 'r')      # return an open file handle
 
 
-def parse_data_table(filename, cluster_name):
+
+def filter_table_by_cluster(filename, cluster_name):
+    '''Match input cluster name to that in table, and return that object's data'''
+
     data = ascii.read(filename)     # This creates an Astropy TABLE object
                                    # http://docs.astropy.org/en/v1.2.1/table/index.html#astropy-table
 
@@ -73,10 +73,7 @@ def parse_data_table(filename, cluster_name):
         masked_data = data[mask]
         return masked_data
 
-def populate_data_arrays(data):
     
-
-
 
 def alive():
     response = "I'm alive!"
