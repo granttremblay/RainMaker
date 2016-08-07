@@ -6,10 +6,24 @@ import numpy as np
 from astropy.io import ascii
 
 def main():
-    parse_arguments()
+    filename, cluster_name = parse_arguments()
 
+    data = parse_data_table(filename, cluster_name)
+
+    print(data)
 
 def parse_arguments():
+    '''
+    Use argparse voodoo to parse command line arguments. 
+    It requires that the user input -f data_table.txt and -n name_of_cluster, 
+    where name_of_cluster can flexibly be entered as, e.g., "abell 2597" or 
+    "ABELL_2597". 
+
+    If the given filename does not exist, or if the cluster name is not found 
+    in the table, it exits with an error. 
+
+    Calls is_valid_file()
+    '''
     parser = argparse.ArgumentParser(description="It's gonna rain...",
                                      usage="python rainmaker.py -f data_table.txt")
 
@@ -25,14 +39,19 @@ def parse_arguments():
 
     # Be flexible with the cluster name. If they entered a space,
     # replace it with a '_', then convert it to UPPERCASE (as required by the ACCEPT table)
-    clustername = args.name_of_cluster.replace(" ", "_").upper()
+    cluster_name = args.name_of_cluster.replace(" ", "_").upper()
 
-    data = parse_data_table(filename, clustername)
-    print(data)
+    return filename, cluster_name 
+
+
     
 
-
 def is_valid_file(parser, arg):
+    '''
+    A simple check to ensure that the file given in the command line argument
+    actually exists. If not, exit with an error (should probably improve this by 
+    querying for a new filename instead of failing). 
+    '''
     if not os.path.isfile(arg):
         parser.error("Cannot find that data table: %s" % arg)
     else:
@@ -40,8 +59,8 @@ def is_valid_file(parser, arg):
         return open(arg, 'r')      # return an open file handle
 
 
-def parse_data_table(intable, cluster_name):
-    data = ascii.read(intable)     # This creates an Astropy TABLE object
+def parse_data_table(filename, cluster_name):
+    data = ascii.read(filename)     # This creates an Astropy TABLE object
                                    # http://docs.astropy.org/en/v1.2.1/table/index.html#astropy-table
 
     mask = data['Name'] == cluster_name
@@ -53,6 +72,9 @@ def parse_data_table(intable, cluster_name):
     else: 
         masked_data = data[mask]
         return masked_data
+
+
+
 
 
 def alive():

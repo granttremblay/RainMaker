@@ -27,10 +27,13 @@ from rainmaker import rainmaker
 
 
 class TestBasics(unittest.TestCase):
+
     '''Test basic functionality to ensure the code is alive'''
     def test_alive(self):
         response = rainmaker.alive()
         self.assertTrue(response == "I'm alive!")
+
+    
 
 
 
