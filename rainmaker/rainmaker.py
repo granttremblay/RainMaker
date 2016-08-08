@@ -73,10 +73,12 @@ def parse_data_table(filename, cluster_name):
     if 'tcool3/2' in data.columns:
         data.rename_column('tcool3/2', 'tcool32')
 
-    data, obs_by_name, clusters_in_table = search_for_cluster_name(data, cluster_name)
+    data = filter_by_cluster(data, cluster_name)
+
+    return data
 
 
-def search_for_cluster_name(data, cluster_name):
+def filter_by_cluster(data, cluster_name):
     '''Takes input astropy TABLE object'''
 
     obs_by_name = data.group_by('Name')
@@ -84,52 +86,18 @@ def search_for_cluster_name(data, cluster_name):
 
     cluster_found = cluster_name in clusters_in_table['Name']
 
+    while cluster_found is False:
+            new_cluster_name = input("Cluster [" + cluster_name + "] not found, try again: ")
+            cluster_name = str(new_cluster_name).replace(' ', '_').upper()
+            cluster_found = cluster_name in clusters_in_table['Name']        
+
     if cluster_found is True:
         print("Matched cluster name to one in the table: " + cluster_name)
         mask = data['Name'] == cluster_name
         masked_data = data[mask]
         print(masked_data)
-        return masked_data, obs_by_name, clusters_in_table
+        return masked_data
 
-    else:
-        print("That cluster name wasn't found: " + cluster_name)
-        cluster_name = str(input("Try again: ")).replace(' ','_').upper()
-        cluster_found = cluster_name in clusters_in_table['Name']
-
-
-    # elif any(clusters_in_table['Name'] == cluster_name):
-    #     print("Matched given cluster name to one in the table: " + cluster_name)
-    #     mask = data['Name'] == cluster_name
-    #     masked_data = data[mask]
-    #     print(masked_data)
-    #     return masked_data, obs_by_name, clusters_in_table 
-
-
-    # if not any(clusters_in_table['Name'] == cluster_name):
-    #     print("That cluster name wasn't found: " + cluster_name)
-    #     sys.exit("Not found.")
-
-
-    # elif any(clusters_in_table['Name'] == cluster_name):
-    #     print("Matched given cluster name to one in the table: " + cluster_name)
-    #     mask = data['Name'] == cluster_name
-    #     masked_data = data[mask]
-        
-    #     return masked_data, obs_by_name, clusters_in_table        
-
-
-    # mask = data['Name'] == cluster_name
-    
-    # # Check if that mask is an array of only FALSE, which means the name wasn't found
-    # if not any(mask):
-    #     print("\n...but the cluster name was not found in the data table :( \n")
-    #     sys.exit("Look here for appropriate names: http://www.pa.msu.edu/astro/MC2/accept/ \n")
-    # else: 
-    #     masked_data = data[mask]
-    #     return masked_data
-
-
-    
 
 def alive():
     response = "I'm alive!"

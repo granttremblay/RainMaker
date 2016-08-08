@@ -17,11 +17,13 @@ can be properly imported.
 http://docs.python-guide.org/en/latest/writing/structure/
 '''
 
+import os
+import sys
+from astropy.io import ascii
 import unittest
-import sys,os
 
 # Set the path explicitly #
-sys.path.insert(0,os.path.abspath(__file__+"/../.."))
+sys.path.insert(0, os.path.abspath(__file__+"/../.."))
 from rainmaker import rainmaker
 
 
@@ -33,9 +35,25 @@ class TestBasics(unittest.TestCase):
         response = rainmaker.alive()
         self.assertTrue(response == "I'm alive!")
 
+    def test_parse_data_table(self):
+        filename = os.getcwd() + "/testdata/accept_main_table.txt"
+        cluster_name = "ABELL_2597"
+        data = ascii.read(filename)
+
+        returned_data = rainmaker.parse_data_table(filename, cluster_name)
+        self.assertTrue(cluster_name in returned_data['Name'])
+
+    def test_filter_by_cluster(self):
+
+        filename = os.getcwd() + "/testdata/accept_main_table.txt"
+        cluster_name = "ABELL_2597"
+        data = ascii.read(filename)
+
+        masked_data = rainmaker.filter_by_cluster(data, cluster_name)
+        self.assertTrue(cluster_name in masked_data['Name'])        
     
 
 
 
 if __name__ == '__main__':
-	unittest.main()
+    unittest.main()
