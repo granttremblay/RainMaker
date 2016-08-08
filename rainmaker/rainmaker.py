@@ -115,6 +115,10 @@ def fit_polynomial(x, y, deg):
     print("Fitting order=%s polynomial to %s, %s" % (deg, x, y))
     coeffs = np.polyfit(x, y, deg)
 
+    chi2 = np.sum((np.polyval(coeffs, x) - y)**2)
+
+    return coeffs, chi2
+
 
 
 
@@ -134,7 +138,8 @@ def logTemp(data):
     yerror = logneerr
 
     deg = 3
-    coeffs = fit_polynomial(logr, lognelec, deg)
+    coeffs, chi2 = fit_polynomial(logr, lognelec, deg)
+
 
     return coeffs
 
