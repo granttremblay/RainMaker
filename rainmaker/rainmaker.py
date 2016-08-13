@@ -109,10 +109,13 @@ def filter_by_cluster(data, cluster_name):
         return masked_data
 
 
-def fit_polynomial(x, y, deg):
+def fit_polynomial(x, y, deg, whatIsFit):
     '''Fits a DEG-order polynomial in x, y space'''
 
-    print("Fitting order=%s polynomial to %s, %s" % (deg, x, y))
+    print("-----------------------------------------------------")
+    print("Fitting " + make_number_ordinal(deg) + " order polynomial to " + whatIsFit )
+    print("-----------------------------------------------------")
+
     coeffs = np.polyfit(x, y, deg)
 
     chi2 = np.sum((np.polyval(coeffs, x) - y)**2)
@@ -128,6 +131,7 @@ def logTemp(data):
     to a polynomial in log r (in Mpc) of degree 'deg'.
     The array 'coeffs' returns the coefficients of that polynomial fit.
     '''
+    whatIsFit = "log electron density (cm^-3) in log radius (Mpc)"
 
     nbins = len(data['Rin'])
     r = (data['Rin'] + data['Rout']) * 0.5
@@ -138,7 +142,7 @@ def logTemp(data):
     yerror = logneerr
 
     deg = 3
-    coeffs, chi2 = fit_polynomial(logr, lognelec, deg)
+    coeffs, chi2 = fit_polynomial(logr, lognelec, deg, whatIsFit)
 
 
     return coeffs
@@ -146,6 +150,19 @@ def logTemp(data):
 def alive():
     response = "I'm alive!"
     return response
+
+
+def make_number_ordinal(num):
+    '''Take number, turn into ordinal. E.g., "2" --> "2nd" '''
+
+    SUFFIXES = {1: 'st', 2: 'nd', 3: 'rd'}
+
+    if 10 <= num % 100 <= 20:
+        suffix = 'th'
+    else:
+        # the second parameter is a default.
+        suffix = SUFFIXES.get(num % 10, 'th')
+    return str(num) + suffix
 
 
 if __name__ == '__main__':
