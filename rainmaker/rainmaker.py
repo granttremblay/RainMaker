@@ -10,6 +10,7 @@ tables from Cavagnolo et al.
 
 import sys
 import os
+import time
 import argparse
 import numpy as np
 from astropy.io import ascii
@@ -183,4 +184,6 @@ def rainmaker_notebook_init(filename, cluster_name_raw):
 
 
 if __name__ == '__main__':
+    start_time = time.time()
     main()
+    print("------ Finished in %s seconds -------" % (round((time.time() - start_time), 3)))
