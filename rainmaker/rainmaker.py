@@ -14,6 +14,7 @@ import argparse
 import numpy as np
 from astropy.io import ascii
 import astropy.units as u
+import matplotlib.pyplot as plt
 
 
 def main():
@@ -147,6 +148,15 @@ def logTemp(data):
 
     return coeffs
 
+def plotter():
+
+    plt.rcParams.update({'font.size': 22,
+                         'axes.labelsize': 20,
+                         'legend.fontsize': 16,
+                         'xtick.labelsize': 18,
+                         'ytick.labelsize': 18,
+                         'axes.linewidth': 2})
+
 def alive():
     response = "I'm alive!"
     return response
@@ -164,10 +174,13 @@ def make_number_ordinal(num):
         suffix = SUFFIXES.get(num % 10, 'th')
     return str(num) + suffix
 
+def rainmaker_notebook_init(filename, cluster_name_raw):
+
+    cluster_name = cluster_name_raw.replace(" ","_").upper()
+    data = ascii.read(filename)
+
+    return data
+
 
 if __name__ == '__main__':
     main()
-    
-
-
-
