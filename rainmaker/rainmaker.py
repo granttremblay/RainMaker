@@ -19,7 +19,7 @@ that of a singular isothermal sphere with a velocity dispersion
 of 250 km/s.  This correction is important only within ~ 10 kpc,
 if at all.
 
-Notice that 
+Notice that
 t_c ~ kT / n \Lambda(T)  and  t_ff ~ r / (kT | dlnP / dlnr |)^1/2 ,
 so their ratio is
 t_c / t_ff ~ (1/nr) (kT)^3/2 [\Lambda(T)]^{-1}  | dlnP / dlnr |^1/2
@@ -46,6 +46,7 @@ import os
 import time
 import argparse
 import numpy as np
+import scipy
 from astropy.io import ascii
 import astropy.units as u
 import matplotlib.pyplot as plt
@@ -62,7 +63,7 @@ def main():
     # Can be split by e.g. data['Rin'], data['Mgrav'], etc.
     data = parse_data_table(filename, cluster_name)
 
-    logTemp(data)
+    logTemp_fit(data)
 
 
 def parse_arguments():
@@ -145,43 +146,59 @@ def filter_by_cluster(data, cluster_name):
         return masked_data
 
 
-def fit_polynomial(x, y, deg, whatIsFit):
-    '''Fits a DEG-order polynomial in x, y space'''
+def fit_polynomial(x, y, deg, yerror, whatIsFit):
+    '''
+    Fits a DEG-order polynomial in x, y space.
+    A 3rd order polynomial is a cubic function
+    '''
 
     print("-----------------------------------------------------")
     print("Fitting " + make_number_ordinal(deg) + " order polynomial to " + whatIsFit )
     print("-----------------------------------------------------")
 
-    coeffs = np.polyfit(x, y, deg)
+    coeffs, covariance = np.polyfit(x, y, deg, full=False, cov=True)
 
-    chi2 = np.sum((np.polyval(coeffs, x) - y)**2)
+    #chi2 = np.sum((np.polyval(coeffs, x) - y)**2)
 
-    return coeffs, chi2
+    print(coeffs)
+    print(covariance)
+    return coeffs
 
-
-def logTemp(data):
-    ''' 
+def logTemp_fit(data):
+    '''
     Fit the logarithmic electron density profile ln(n_e) (in cm^-3)
     to a polynomial in log r (in Mpc) of degree 'deg'.
     The array 'coeffs' returns the coefficients of that polynomial fit.
     '''
-    whatIsFit = "log electron density (cm^-3) in log radius (Mpc)"
-
-    nbins = len(data['Rin'])
-    r = (data['Rin'] + data['Rout']) * 0.5
-    logr = np.log10(r)
-
-    lognelec = np.log10(data['nelec'])
-    logneerr = np.log10(data['neerr'] / data['nelec'])
-    yerror = logneerr
+    whatIsFit = "ln kT (keV) in log radius (Mpc) of degree DEG"
 
     deg = 3
-    coeffs, chi2 = fit_polynomial(logr, lognelec, deg, whatIsFit)
+
+    r = (data['Rin'] + data['Rout']) * 0.5
+    logr = np.log(r) # this is the NATURAL logarithm, ln
+
+    logt = np.log(data['Tx'])
+    logterr = np.log(data['Txerr'] / data['Tx'])
+
+    yerror = logterr
+
+    coeffs = fit_polynomial(logr, logt, deg, yerror, whatIsFit)
+
+    logtfit = 0.0 * logr
+
+    for i in np.arange(deg):
+        logtfit = logtfit + coeffs[i]*logr**i
+
+    tfit = np.exp(logtfit)
+
+    plt.scatter(r,data['Tx'], marker='o')
+    plt.plot(r,tfit)
+    plt.show(block=True)
 
     return coeffs
 
 
-def plotter():
+def plotter(x, y):
 
     plt.rcParams.update({'font.size': 22,
                          'axes.labelsize': 20,
@@ -189,6 +206,9 @@ def plotter():
                          'xtick.labelsize': 18,
                          'ytick.labelsize': 18,
                          'axes.linewidth': 2})
+
+    fig, ax = plt.subplots()
+    ax.plot(x, y, 'b--',marker='s', label=r"$y = \alpha^2$")   
 
 
 def alive():
