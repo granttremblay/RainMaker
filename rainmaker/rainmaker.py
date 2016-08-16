@@ -4,6 +4,39 @@
 Rainmaker fits log density and temperature profiles to the ACCEPT
 tables from Cavagnolo et al.
 
+It works by fitting third-order polynomials in log space to the
+temperature and pressure profiles, which is robust and usually
+gives a pretty good fit.  The logarithmic pressure profile is
+then  analytically differentiated to determine
+rg(r) = - (kT / mu m_p) (d ln P / d ln r),
+from which one gets the free-fall time.
+
+In some instances, the best-fit pressure profile gets very flat
+or even reverses near the center, which is handled by preventing
+the derivative from going all the way to zero.  And to account
+for the presence of a BCG, the minimum value of g is set to be
+that of a singular isothermal sphere with a velocity dispersion
+of 250 km/s.  This correction is important only within ~ 10 kpc,
+if at all.
+
+Notice that 
+t_c ~ kT / n \Lambda(T)  and  t_ff ~ r / (kT | dlnP / dlnr |)^1/2 ,
+so their ratio is
+t_c / t_ff ~ (1/nr) (kT)^3/2 [\Lambda(T)]^{-1}  | dlnP / dlnr |^1/2
+
+
+At radii of several tens of kpc in a cool-core cluster,
+the product of density times radius is roughly constant,
+so the value of this ratio will track the temperature gradient.
+However, we find that the density profile at smaller radii flattens
+out in our deprojected profiles, which causes the product nr to
+grow with radius and the timescale ratio to drop with radius.
+
+So the key thing to look at is the behavior of the product of
+radius and density at small radii.
+
+
+
 -Grant Tremblay (Yale University)
 '''
 
