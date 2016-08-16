@@ -96,7 +96,8 @@ def filter_by_cluster(data, cluster_name):
     cluster_found = cluster_name in clusters_in_table['Name']
 
     while cluster_found is False:
-            new_cluster_name = input("Cluster [" + cluster_name + "] not found, try again: ")
+            new_cluster_name = input("Cluster [" + cluster_name +
+                                     "] not found, try again: ")
             if new_cluster_name.startswith('"') and new_cluster_name.endswith('"'):
                 cluster_name = new_cluster_name[1:-1].replace(' ', '_').upper()
             else:
@@ -125,8 +126,6 @@ def fit_polynomial(x, y, deg, whatIsFit):
     return coeffs, chi2
 
 
-
-
 def logTemp(data):
     ''' 
     Fit the logarithmic electron density profile ln(n_e) (in cm^-3)
@@ -146,8 +145,8 @@ def logTemp(data):
     deg = 3
     coeffs, chi2 = fit_polynomial(logr, lognelec, deg, whatIsFit)
 
-
     return coeffs
+
 
 def plotter():
 
@@ -157,6 +156,7 @@ def plotter():
                          'xtick.labelsize': 18,
                          'ytick.labelsize': 18,
                          'axes.linewidth': 2})
+
 
 def alive():
     response = "I'm alive!"
@@ -175,10 +175,11 @@ def make_number_ordinal(num):
         suffix = SUFFIXES.get(num % 10, 'th')
     return str(num) + suffix
 
-def rainmaker_notebook_init(filename, cluster_name_raw):
 
+def rainmaker_notebook_init(filename, cluster_name_raw):
+    '''Run this in a Jupyter Notebook for exploration'''
     cluster_name = cluster_name_raw.replace(" ","_").upper()
-    data = ascii.read(filename)
+    data = parse_data_table(filename, cluster_name)
 
     return data
 
@@ -186,4 +187,5 @@ def rainmaker_notebook_init(filename, cluster_name_raw):
 if __name__ == '__main__':
     start_time = time.time()
     main()
-    print("------ Finished in %s seconds -------" % (round((time.time() - start_time), 3)))
+    print("------ Finished in %s seconds -------"
+          % (round((time.time() - start_time), 3)))
