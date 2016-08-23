@@ -40,15 +40,17 @@ radius and density at small radii.
 -Grant Tremblay (Yale University)
 '''
 
-
 import sys
 import os
 import time
 import argparse
+
 import numpy as np
 import scipy
+
 from astropy.io import ascii
 import astropy.units as u
+
 import matplotlib.pyplot as plt
 
 
@@ -129,7 +131,7 @@ def filter_by_cluster(data, cluster_name):
 
     cluster_found = cluster_name in clusters_in_table['Name']
 
-    while cluster_found is False:
+    while not cluster_found:
             new_cluster_name = input("Cluster [" + cluster_name +
                                      "] not found, try again: ")
             if new_cluster_name.startswith('"') and new_cluster_name.endswith('"'):
@@ -138,7 +140,7 @@ def filter_by_cluster(data, cluster_name):
                 cluster_name = new_cluster_name.replace(' ', '_').upper()
             cluster_found = cluster_name in clusters_in_table['Name']
 
-    if cluster_found is True:
+    if cluster_found:
         print("Matched cluster name to one in the table: " + cluster_name)
         mask = data['Name'] == cluster_name
         masked_data = data[mask]
@@ -153,11 +155,11 @@ def fit_polynomial(x, y, deg, yerror, whatIsFit):
     '''
 
     print("-----------------------------------------------------")
-    print("Fitting " + make_number_ordinal(deg) + " order polynomial to " + whatIsFit )
+    print("Fitting " + make_number_ordinal(deg) +
+          " order polynomial to " + whatIsFit)
     print("-----------------------------------------------------")
 
     coeffs, covariance = np.polyfit(x, y, deg, full=False, cov=True)
-
     #chi2 = np.sum((np.polyval(coeffs, x) - y)**2)
 
     print(coeffs)
@@ -175,7 +177,8 @@ def logTemp_fit(data):
     deg = 3
 
     r = (data['Rin'] + data['Rout']) * 0.5
-    logr = np.log(r) # this is the NATURAL logarithm, ln
+    logr = np.log(r)
+    # this is the NATURAL logarithm, ln
 
     logt = np.log(data['Tx'])
     logterr = np.log(data['Txerr'] / data['Tx'])
@@ -191,8 +194,8 @@ def logTemp_fit(data):
 
     tfit = np.exp(logtfit)
 
-    plt.scatter(r,data['Tx'], marker='o')
-    plt.plot(r,tfit)
+    plt.scatter(r, data['Tx'], marker='o')
+    plt.plot(r, tfit)
     plt.show(block=True)
 
     return coeffs
