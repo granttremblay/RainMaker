@@ -71,17 +71,23 @@ def main():
 def parse_arguments():
     '''Set up and parse command line arguments.'''
 
-    parser = argparse.ArgumentParser(description="It's gonna rain...",
-                                     usage="rainmaker.py -f data_table.txt")
+    parser = argparse.ArgumentParser(description="Rainmaker fits ACCEPT profiles to quantify \
+                                                  parameters relevant to precipitation",
+                                     usage="rainmaker.py -f data_table.txt -n 'Cluster Name'")
 
-    parser.add_argument("-f", "--filename", dest="filename", required=True,
-                        help="input file with data", metavar="FILE",
+    parser.add_argument("-f", "--filename",
+                        dest="filename", 
+                        required=False,
+                        default="accept_main_table.txt",
+                        help="input file with data (default: accept_main_table.txt)",
+                        metavar="FILE",
                         type=lambda x: is_valid_file(parser, x))
 
     parser.add_argument("-n", "--name_of_cluster",
                         dest="name_of_cluster",
-                        required=True,
-                        help="Name of the cluster.")
+                        required=False,
+                        default="Abell 2597",
+                        help="Name of the cluster (default: Abell 2597)")
 
     args = parser.parse_args()
     filename = args.filename.name
@@ -186,6 +192,10 @@ def assign_units(data):
     # Yes, I know I could do this in a for loop. But I want to
     # enable granular control over what columns are ultimately
     # written into the final "Science-ready" data table.
+
+    # Note, this is an astropy QTable instead of a Table, so 
+    # that I can preserve units. Read more here: 
+    # http://docs.astropy.org/en/stable/table/mixin_columns.html#quantity-and-qtable
     data = QTable(
                  [Name, Rin, Rout, nelec, neerr, Kitpl,
                   Kflat, Kerr, Pitpl, Perr, Mgrav, Merr,
