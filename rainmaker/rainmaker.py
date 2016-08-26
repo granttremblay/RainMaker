@@ -65,8 +65,6 @@ def main():
     # Can be split by e.g. data['Rin'], data['Mgrav'], etc.
     data = parse_data_table(filename, cluster_name)
 
-    print(data)
-
 
 def parse_arguments():
     '''Set up and parse command line arguments.'''
@@ -105,9 +103,9 @@ def is_valid_file(parser, arg):
     '''Check to ensure existence of the file.'''
 
     if not os.path.isfile(arg):
-        parser.error("Cannot find that data table: %s" % arg)
+        parser.error("Cannot find that data table: {}".format(arg))
     else:
-        print("\nSuccessfully found input file: %s" % arg)
+        print("\nTable found    |  {}".format(arg))
         return open(arg, 'r')      # return an open file handle
 
 
@@ -140,19 +138,23 @@ def filter_by_cluster(data, cluster_name):
     cluster_found = cluster_name in clusters_in_table['Name']
 
     while not cluster_found:
-            new_cluster_name = input("Cluster [" + cluster_name +
-                                     "] not found, try again: ")
-            if new_cluster_name.startswith('"') and new_cluster_name.endswith('"'):
+            new_cluster_name = input("Cluster (" + cluster_name +
+                                     ") not found, try again: ")
+
+            messyname = (new_cluster_name.startswith('"') and
+                         new_cluster_name.endswith('"'))
+
+            # If the user entered quotation marks, strip them
+            if messyname:
                 cluster_name = new_cluster_name[1:-1].replace(' ', '_').upper()
             else:
                 cluster_name = new_cluster_name.replace(' ', '_').upper()
             cluster_found = cluster_name in clusters_in_table['Name']
 
     if cluster_found:
-        print("Matched cluster name to one in the table: " + cluster_name)
+        print("Cluster found  |  " + cluster_name)
         mask = data['Name'] == cluster_name
         masked_data = data[mask]
-        print(masked_data)
         return masked_data
 
 
@@ -193,8 +195,8 @@ def assign_units(data):
     # enable granular control over what columns are ultimately
     # written into the final "Science-ready" data table.
 
-    # Note, this is an astropy QTable instead of a Table, so 
-    # that I can preserve units. Read more here: 
+    # Note, this is an astropy QTable instead of a Table, so
+    # that I can preserve units. Read more here:
     # http://docs.astropy.org/en/stable/table/mixin_columns.html#quantity-and-qtable
     data = QTable(
                  [Name, Rin, Rout, nelec, neerr, Kitpl,
@@ -307,22 +309,17 @@ def plotter(x, y):
     ax.plot(x, y, 'b--', marker='s', label=r"$y = \alpha^2$")
 
 
-def alive():
-    response = "I'm alive!"
-    return response
-
-
-def make_number_ordinal(num):
+def make_number_ordinal(number):
     '''Take number, turn into ordinal. E.g., "2" --> "2nd" '''
 
     suffixes = {1: 'st', 2: 'nd', 3: 'rd'}
 
-    if 10 <= num % 100 <= 20:
+    if 10 <= number % 100 <= 20:
         suffix = 'th'
     else:
         # the second parameter is a default.
-        suffix = suffixes.get(num % 10, 'th')
-    return str(num) + suffix
+        suffix = suffixes.get(number % 10, 'th')
+    return str(number) + suffix
 
 
 def rainmaker_notebook_init(filename, cluster_name_raw):
@@ -336,5 +333,5 @@ def rainmaker_notebook_init(filename, cluster_name_raw):
 if __name__ == '__main__':
     start_time = time.time()
     main()
-    print("------ Finished in %s seconds -------"
-          % (round((time.time() - start_time), 3)))
+    runtime = round((time.time() - start_time), 3)
+    print("Finished in    |  {} seconds".format(runtime))

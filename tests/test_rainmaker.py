@@ -32,11 +32,7 @@ from rainmaker import rainmaker
 
 
 class TestBasics(unittest.TestCase):
-
     '''Test basic functionality to ensure the code is alive'''
-    def test_alive(self):
-        response = rainmaker.alive()
-        self.assertTrue(response == "I'm alive!")
 
     def test_parse_data_table(self):
         filename = os.getcwd() + "/testdata/accept_main_table.txt"
@@ -66,6 +62,14 @@ class TestBasics(unittest.TestCase):
 
         Mpc_divides_correctly = radiusValue.unit / (u.pc * 1.0e6).to(u.Mpc)
         self.assertTrue(Mpc_divides_correctly == 1)
+
+    def test_make_number_ordinal(self):
+
+        number = rainmaker.make_number_ordinal(3)
+        self.assertTrue('3rd' == number)
+
+        number = rainmaker.make_number_ordinal(28)
+        self.assertTrue('28th' == number)
 
 
 
