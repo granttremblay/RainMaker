@@ -201,6 +201,31 @@ def logTemp_fit(data):
     return coeffs
 
 
+def coolingFunction(kT):
+    '''
+    Implement the Tozzi & Norman (2001) cooling function,
+    as shown in Parrish, Quataert, & Sharma (2009) eq. 16. 
+
+    $\Lambda(T) = [C_1(k_B T)^{-1.7} + C_2(k_B T)^{0.5} + C_3] \times 10^{-22}$
+    '''
+
+    keV = u.eV * 1000.0
+    kT_keV = kT * keV
+
+    # For a metallicity of Z = 0.3 Z_solar, 
+    C1 = 8.6e-3 * u.erg / (u.cm**3 * u.s)
+    C2 = 5.8e-3 * u.erg / (u.cm**3 * u.s)
+    C3 = 6.3e-2 * u.erg / (u.cm**3 * u.s)
+
+    alpha = -1.7
+    beta = 0.5
+
+    coolingFunction = ((C1 * (kT_keV / keV)**alpha) + (C2 * (kT_keV / keV)**beta) + C3)*1e-22
+
+    return coolingFunction
+
+
+
 def plotter(x, y):
 
     plt.rcParams.update({'font.size': 22,
