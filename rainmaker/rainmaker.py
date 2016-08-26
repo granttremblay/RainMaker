@@ -40,13 +40,11 @@ radius and density at small radii.
 -Grant Tremblay (Yale University)
 '''
 
-import sys
 import os
 import time
 import argparse
 
 import numpy as np
-import scipy
 
 from astropy.io import ascii
 import astropy.units as u
@@ -160,11 +158,12 @@ def fit_polynomial(x, y, deg, yerror, whatIsFit):
     print("-----------------------------------------------------")
 
     coeffs, covariance = np.polyfit(x, y, deg, full=False, cov=True)
-    #chi2 = np.sum((np.polyval(coeffs, x) - y)**2)
+    # chi2 = np.sum((np.polyval(coeffs, x) - y)**2)
 
     print(coeffs)
     print(covariance)
     return coeffs
+
 
 def logTemp_fit(data):
     '''
@@ -204,15 +203,22 @@ def logTemp_fit(data):
 def coolingFunction(kT):
     '''
     Implement the Tozzi & Norman (2001) cooling function,
-    as shown in Parrish, Quataert, & Sharma (2009) eq. 16. 
+    as shown in Parrish, Quataert, & Sharma (2009) eq. 16.
+    and Guo & Oh (2014) (better, as they get the / keV
+    units right). See here: arXiv:0706.1274
 
-    $\Lambda(T) = [C_1(k_B T)^{-1.7} + C_2(k_B T)^{0.5} + C_3] \times 10^{-22}$
+    This is the Tozzi & Norman (2001) analytic fit
+    to calculations by Sutherland & Dopita (1993)
+
+    $\Lambda(T) = [C_1 \left( \frac{k_B T}{\mathrm{keV}} \right)^{-1.7}
+                  + C_2\left( \frac{k_B T}{\mathrm{keV}} \right)^{0.5}
+                  + C_3] \times 10^{-22}$
     '''
 
     keV = u.eV * 1000.0
     kT_keV = kT * keV
 
-    # For a metallicity of Z = 0.3 Z_solar, 
+    # For a metallicity of Z = 0.3 Z_solar,
     C1 = 8.6e-3 * u.erg / (u.cm**3 * u.s)
     C2 = 5.8e-3 * u.erg / (u.cm**3 * u.s)
     C3 = 6.3e-2 * u.erg / (u.cm**3 * u.s)
@@ -220,10 +226,13 @@ def coolingFunction(kT):
     alpha = -1.7
     beta = 0.5
 
-    coolingFunction = ((C1 * (kT_keV / keV)**alpha) + (C2 * (kT_keV / keV)**beta) + C3)*1e-22
+    coolingFunction = (
+                       (C1 * (kT_keV / keV)**alpha) +
+                       (C2 * (kT_keV / keV)**beta) +
+                       C3
+                       )*1e-22
 
     return coolingFunction
-
 
 
 def plotter(x, y):
@@ -236,7 +245,7 @@ def plotter(x, y):
                          'axes.linewidth': 2})
 
     fig, ax = plt.subplots()
-    ax.plot(x, y, 'b--',marker='s', label=r"$y = \alpha^2$")   
+    ax.plot(x, y, 'b--', marker='s', label=r"$y = \alpha^2$")
 
 
 def alive():
@@ -247,19 +256,19 @@ def alive():
 def make_number_ordinal(num):
     '''Take number, turn into ordinal. E.g., "2" --> "2nd" '''
 
-    SUFFIXES = {1: 'st', 2: 'nd', 3: 'rd'}
+    suffixes = {1: 'st', 2: 'nd', 3: 'rd'}
 
     if 10 <= num % 100 <= 20:
         suffix = 'th'
     else:
         # the second parameter is a default.
-        suffix = SUFFIXES.get(num % 10, 'th')
+        suffix = suffixes.get(num % 10, 'th')
     return str(num) + suffix
 
 
 def rainmaker_notebook_init(filename, cluster_name_raw):
     '''Run this in a Jupyter Notebook for exploration'''
-    cluster_name = cluster_name_raw.replace(" ","_").upper()
+    cluster_name = cluster_name_raw.replace(" ", "_").upper()
     data = parse_data_table(filename, cluster_name)
 
     return data
