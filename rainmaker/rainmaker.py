@@ -47,6 +47,8 @@ import argparse
 import numpy as np
 
 from astropy.io import ascii
+from astropy.table import Table
+
 import astropy.units as u
 
 import matplotlib.pyplot as plt
@@ -63,7 +65,7 @@ def main():
     # Can be split by e.g. data['Rin'], data['Mgrav'], etc.
     data = parse_data_table(filename, cluster_name)
 
-    logTemp_fit(data)
+    print(data)
 
 
 def parse_arguments():
@@ -118,6 +120,8 @@ def parse_data_table(filename, cluster_name):
 
     data = filter_by_cluster(data, cluster_name)
 
+    data = assign_units(data)
+
     return data
 
 
@@ -144,6 +148,44 @@ def filter_by_cluster(data, cluster_name):
         masked_data = data[mask]
         print(masked_data)
         return masked_data
+
+
+def assign_units(data):
+
+    keV = u.eV * 1000.0
+
+    Name = data['Name']
+    Rin = data['Rin'] * u.Mpc
+    Rout = data['Rout'] * u.Mpc
+    nelec = data['nelec'] * u.cm**(-3)
+    neerr = data['neerr'] * u.cm**(-3)
+    Kitpl = data['Kitpl'] * keV * u.cm**2
+    Kflat = data['Kflat'] * keV * u.cm**2
+    Kerr = data['Kerr'] * keV * u.cm**2
+    Pitpl = data['Pitpl'] * u.dyne * u.cm**(-2)
+    Perr = data['Perr'] * u.dyne * u.cm**(-2)
+    Mgrav = data['Mgrav'] * u.M_sun
+    Merr = data['Merr'] * u.M_sun
+    Tx = data['Tx'] * keV
+    Txerr = data['Txerr'] * keV
+    Lambda = data['Lambda'] * u.erg * u.cm**3 / u.s
+    tcool52 = data['tcool52'] * u.Gyr
+    tcool52err = data['t52err'] * u.Gyr
+    tcool32 = data['tcool32'] * u.Gyr
+    tcool32err = data['t32err'] * u.Gyr
+
+    data = Table(
+                 [Name, Rin, Rout, nelec, neerr, Kitpl,
+                  Kflat, Kerr, Pitpl, Perr, Mgrav, Merr,
+                  Tx, Txerr, Lambda, tcool52, tcool52err,
+                  tcool32, tcool32err],
+                  names = ('Name', 'Rin', 'Rout', 'nelec', 'neerr', 'Kitpl',
+                  'Kflat', 'Kerr', 'Pitpl', 'Perr', 'Mgrav', 'Merr',
+                  'Tx', 'Txerr', 'Lambda', 'tcool52', 't52err',
+                  'tcool32', 't32err')
+                )
+
+    return data
 
 
 def fit_polynomial(x, y, deg, yerror, whatIsFit):
@@ -203,12 +245,12 @@ def logTemp_fit(data):
 def coolingFunction(kT):
     '''
     Implement the Tozzi & Norman (2001) cooling function,
-    as shown in Parrish, Quataert, & Sharma (2009) eq. 16.
-    and Guo & Oh (2014) (better, as they get the / keV
-    units right). See here: arXiv:0706.1274
+    which is an analytic fit to Sutherland & Dopita (1993).
 
-    This is the Tozzi & Norman (2001) analytic fit
-    to calculations by Sutherland & Dopita (1993)
+    This is shown in Equation 16 of Parrish, Quataert,
+    & Sharma (2009), as well as Guo & Oh (2014).
+
+    See here: arXiv:0706.1274. The equation is:
 
     $\Lambda(T) = [C_1 \left( \frac{k_B T}{\mathrm{keV}} \right)^{-1.7}
                   + C_2\left( \frac{k_B T}{\mathrm{keV}} \right)^{0.5}
