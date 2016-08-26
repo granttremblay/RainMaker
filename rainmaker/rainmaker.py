@@ -47,7 +47,7 @@ import argparse
 import numpy as np
 
 from astropy.io import ascii
-from astropy.table import Table
+from astropy.table import QTable
 
 import astropy.units as u
 
@@ -186,7 +186,7 @@ def assign_units(data):
     # Yes, I know I could do this in a for loop. But I want to
     # enable granular control over what columns are ultimately
     # written into the final "Science-ready" data table.
-    data = Table(
+    data = QTable(
                  [Name, Rin, Rout, nelec, neerr, Kitpl,
                   Kflat, Kerr, Pitpl, Perr, Mgrav, Merr,
                   Tx, Txerr, Lambda, tcool52, tcool52err,
@@ -266,7 +266,6 @@ def coolingFunction(kT):
     '''
 
     keV = u.eV * 1000.0
-    kT_keV = kT * keV
 
     # For a metallicity of Z = 0.3 Z_solar,
     C1 = 8.6e-3 * u.erg / (u.cm**3 * u.s)
@@ -277,8 +276,8 @@ def coolingFunction(kT):
     beta = 0.5
 
     coolingFunction = (
-                       (C1 * (kT_keV / keV)**alpha) +
-                       (C2 * (kT_keV / keV)**beta) +
+                       (C1 * (kT / keV)**alpha) +
+                       (C2 * (kT / keV)**beta) +
                        C3
                        )*1e-22
 

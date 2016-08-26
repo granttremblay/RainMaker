@@ -20,6 +20,9 @@ http://docs.python-guide.org/en/latest/writing/structure/
 import os
 import sys
 from astropy.io import ascii
+import astropy.units as u
+import astropy.constants as const
+
 import unittest
 
 # Set the path explicitly #
@@ -38,7 +41,6 @@ class TestBasics(unittest.TestCase):
     def test_parse_data_table(self):
         filename = os.getcwd() + "/testdata/accept_main_table.txt"
         cluster_name = "ABELL_2597"
-        data = ascii.read(filename)
 
         returned_data = rainmaker.parse_data_table(filename, cluster_name)
         self.assertTrue(cluster_name in returned_data['Name'])
@@ -50,8 +52,22 @@ class TestBasics(unittest.TestCase):
         data = ascii.read(filename)
 
         masked_data = rainmaker.filter_by_cluster(data, cluster_name)
-        self.assertTrue(cluster_name in masked_data['Name'])        
-    
+        self.assertTrue(cluster_name in masked_data['Name'])
+
+    def test_assign_units(self):
+
+        filename = os.getcwd() + "/testdata/accept_main_table.txt"
+        data = rainmaker.parse_data_table(filename, "ABELL_2597")
+
+        massValue = data['Mgrav'][0]
+        radiusValue = data['Rin'][0]
+
+        self.assertTrue('solMass' is str(massValue.unit))
+
+        Mpc_divides_correctly = radiusValue.unit / (u.pc * 1.0e6).to(u.Mpc)
+        self.assertTrue(Mpc_divides_correctly == 1)
+
+
 
 
 
