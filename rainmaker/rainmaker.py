@@ -154,6 +154,9 @@ def assign_units(data):
 
     keV = u.eV * 1000.0
 
+    # I could probably do this in a more intelligent manner,
+    # but I want to assign units in a clear way!
+
     Name = data['Name']
     Rin = data['Rin'] * u.Mpc
     Rout = data['Rout'] * u.Mpc
@@ -180,6 +183,9 @@ def assign_units(data):
              'tcool32', 't32err'
              )
 
+    # Yes, I know I could do this in a for loop. But I want to
+    # enable granular control over what columns are ultimately
+    # written into the final "Science-ready" data table.
     data = Table(
                  [Name, Rin, Rout, nelec, neerr, Kitpl,
                   Kflat, Kerr, Pitpl, Perr, Mgrav, Merr,
