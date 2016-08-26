@@ -174,15 +174,17 @@ def assign_units(data):
     tcool32 = data['tcool32'] * u.Gyr
     tcool32err = data['t32err'] * u.Gyr
 
+    names = ('Name', 'Rin', 'Rout', 'nelec', 'neerr', 'Kitpl',
+             'Kflat', 'Kerr', 'Pitpl', 'Perr', 'Mgrav', 'Merr',
+             'Tx', 'Txerr', 'Lambda', 'tcool52', 't52err',
+             'tcool32', 't32err'
+             )
+
     data = Table(
                  [Name, Rin, Rout, nelec, neerr, Kitpl,
                   Kflat, Kerr, Pitpl, Perr, Mgrav, Merr,
                   Tx, Txerr, Lambda, tcool52, tcool52err,
-                  tcool32, tcool32err],
-                  names = ('Name', 'Rin', 'Rout', 'nelec', 'neerr', 'Kitpl',
-                  'Kflat', 'Kerr', 'Pitpl', 'Perr', 'Mgrav', 'Merr',
-                  'Tx', 'Txerr', 'Lambda', 'tcool52', 't52err',
-                  'tcool32', 't32err')
+                  tcool32, tcool32err], names=names
                 )
 
     return data
