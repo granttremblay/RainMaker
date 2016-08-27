@@ -69,9 +69,10 @@ def main():
 def parse_arguments():
     '''Set up and parse command line arguments.'''
 
-    parser = argparse.ArgumentParser(description="Rainmaker fits ACCEPT profiles to quantify \
-                                                  parameters relevant to precipitation",
-                                     usage="rainmaker.py -f data_table.txt -n 'Cluster Name'")
+    parser = argparse.ArgumentParser(description=
+                                     "Rainmaker fits ACCEPT profiles to quantify \
+                                     parameters relevant to precipitation",
+                                     usage="rainmaker.py -f table.txt -n 'Cluster'")
 
     parser.add_argument("-f", "--filename",
                         dest="filename", 
@@ -290,7 +291,7 @@ def coolingFunction(kT):
     coolingFunction = (
                        (C1 * (kT / keV)**alpha) +
                        (C2 * (kT / keV)**beta) +
-                       C3
+                       (C3)
                        )*1e-22
 
     return coolingFunction
