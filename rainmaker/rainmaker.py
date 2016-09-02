@@ -164,8 +164,6 @@ def filter_by_cluster(data, cluster_name):
 
 def assign_units(data):
 
-    keV = u.eV * 1000.0
-
     # I could probably do this in a more intelligent manner,
     # but I want to assign units in a clear way!
 
@@ -174,15 +172,15 @@ def assign_units(data):
     Rout = data['Rout'] * u.Mpc
     nelec = data['nelec'] * u.cm**(-3)
     neerr = data['neerr'] * u.cm**(-3)
-    Kitpl = data['Kitpl'] * keV * u.cm**2
-    Kflat = data['Kflat'] * keV * u.cm**2
-    Kerr = data['Kerr'] * keV * u.cm**2
+    Kitpl = data['Kitpl'] * u.keV * u.cm**2
+    Kflat = data['Kflat'] * u.keV * u.cm**2
+    Kerr = data['Kerr'] * u.keV * u.cm**2
     Pitpl = data['Pitpl'] * u.dyne * u.cm**(-2)
     Perr = data['Perr'] * u.dyne * u.cm**(-2)
     Mgrav = data['Mgrav'] * u.M_sun
     Merr = data['Merr'] * u.M_sun
-    Tx = data['Tx'] * keV
-    Txerr = data['Txerr'] * keV
+    Tx = data['Tx'] * u.keV
+    Txerr = data['Txerr'] * u.keV
     Lambda = data['Lambda'] * u.erg * u.cm**3 / u.s
     tcool52 = data['tcool52'] * u.Gyr
     tcool52err = data['t52err'] * u.Gyr
@@ -249,14 +247,22 @@ def logTemp_fit(data):
     # this is the NATURAL logarithm, ln
 
     logt = np.log(data['Tx'].value)
-    #logterr = np.log(data['Txerr'] / data['Tx'])
+    logterr = np.log(data['Txerr'] / data['Tx'])
 
     fit = fit_polynomial(logr, logt, deg, whatIsFit)
 
-    plt.scatter(r, data['Tx'], marker='o')
-    plt.plot(r, fit)
-    plt.show(block=True)
+    plt.figure()
+    plt.plot(r.to(u.kpc), data['Tx'], marker='o', markersize=5, linestyle='None')
 
+    ax = plt.gca()
+    ax.set_yscale('log')
+    ax.set_xscale('log')
+    #ax.set_ylim(1,10)
+
+    #plt.fill_between(r, data['Tx']+data['Txerr'], data['Tx']-data['Txerr'], facecolor='blue', alpha=0.5)
+    plt.plot(r.to(u.kpc), fit)
+    plt.show(block=True)
+ 
 
 def coolingFunction(kT):
     '''
