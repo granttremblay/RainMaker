@@ -45,6 +45,7 @@ import time
 import argparse
 
 import numpy as np
+import numpy.polynomial.polynomial as poly
 
 from astropy.io import ascii
 from astropy.table import QTable
@@ -64,6 +65,8 @@ def main():
     # filtered to show all properties of a given cluster
     # Can be split by e.g. data['Rin'], data['Mgrav'], etc.
     data = parse_data_table(filename, cluster_name)
+
+    logTemp_fit(data)
 
 
 def parse_arguments():
@@ -209,10 +212,14 @@ def assign_units(data):
     return data
 
 
-def fit_polynomial(x, y, deg, yerror, whatIsFit):
+def fit_polynomial(x, y, deg, whatIsFit):
     '''
     Fits a DEG-order polynomial in x, y space.
     A 3rd order polynomial is a cubic function
+
+    poly.polyfit() returns coefficients, from 0th
+    order first to N-th order last (note that this is
+    *opposite* from how np.polyfit behaves!).
     '''
 
     print("-----------------------------------------------------")
@@ -220,12 +227,12 @@ def fit_polynomial(x, y, deg, yerror, whatIsFit):
           " order polynomial to " + whatIsFit)
     print("-----------------------------------------------------")
 
-    coeffs, covariance = np.polyfit(x, y, deg, full=False, cov=True)
-    # chi2 = np.sum((np.polyval(coeffs, x) - y)**2)
+    coeffs = poly.polyfit(x, y, deg)
+    logfit = poly.polyval(x, coeffs)
 
-    print(coeffs)
-    print(covariance)
-    return coeffs
+    fit = np.exp(logfit)
+
+    return fit
 
 
 def logTemp_fit(data):
@@ -234,33 +241,21 @@ def logTemp_fit(data):
     to a polynomial in log r (in Mpc) of degree 'deg'.
     The array 'coeffs' returns the coefficients of that polynomial fit.
     '''
-    whatIsFit = "ln kT (keV) in log radius (Mpc) of degree DEG"
-
+    whatIsFit = "ln kT (keV) in log radius (Mpc)"
     deg = 3
 
     r = (data['Rin'] + data['Rout']) * 0.5
-    logr = np.log(r)
+    logr = np.log(r.value)
     # this is the NATURAL logarithm, ln
 
-    logt = np.log(data['Tx'])
-    logterr = np.log(data['Txerr'] / data['Tx'])
+    logt = np.log(data['Tx'].value)
+    #logterr = np.log(data['Txerr'] / data['Tx'])
 
-    yerror = logterr
-
-    coeffs = fit_polynomial(logr, logt, deg, yerror, whatIsFit)
-
-    logtfit = 0.0 * logr
-
-    for i in np.arange(deg):
-        logtfit = logtfit + coeffs[i]*logr**i
-
-    tfit = np.exp(logtfit)
+    fit = fit_polynomial(logr, logt, deg, whatIsFit)
 
     plt.scatter(r, data['Tx'], marker='o')
-    plt.plot(r, tfit)
+    plt.plot(r, fit)
     plt.show(block=True)
-
-    return coeffs
 
 
 def coolingFunction(kT):
@@ -323,10 +318,10 @@ def make_number_ordinal(number):
     return str(number) + suffix
 
 
-def rainmaker_notebook_init(filename, cluster_name_raw):
+def rainmaker_notebook_init(filename, cluster_name):
     '''Run this in a Jupyter Notebook for exploration'''
-    cluster_name = cluster_name_raw.replace(" ", "_").upper()
-    data = parse_data_table(filename, cluster_name)
+
+    data = parse_data_table(filename, cluster_name.replace(" ", "_").upper())
 
     return data
 
