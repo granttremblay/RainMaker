@@ -49,7 +49,6 @@ import numpy.polynomial.polynomial as poly
 
 from astropy.io import ascii
 from astropy.table import QTable
-
 import astropy.units as u
 
 import matplotlib.pyplot as plt
