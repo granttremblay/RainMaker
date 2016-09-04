@@ -52,6 +52,7 @@ from astropy.table import QTable
 import astropy.units as u
 
 import matplotlib.pyplot as plt
+import matplotlib.style as style
 
 
 def main():
@@ -209,7 +210,7 @@ def assign_units(data):
     return data
 
 
-def fit_polynomial(x, y, deg, whatIsFit):
+def fit_polynomial(data, ln_xray_property, deg, whatIsFit):
     '''
     Fits a DEG-order polynomial in x, y space.
     A 3rd order polynomial is a cubic function
@@ -218,50 +219,105 @@ def fit_polynomial(x, y, deg, whatIsFit):
     order first to N-th order last (note that this is
     *opposite* from how np.polyfit behaves!).
     '''
+    r, ln_r, r_fine, log10_r_fine, ln_r_fine = extrapolate_radius(data)
 
-    print("-----------------------------------------------------")
-    print("Fitting " + make_number_ordinal(deg) +
+    print("Now fitting    |" + "  " + make_number_ordinal(deg) +
           " order polynomial to " + whatIsFit)
-    print("-----------------------------------------------------")
 
-    coeffs = poly.polyfit(x, y, deg)
-    logfit = poly.polyval(x, coeffs)
+    coeffs = poly.polyfit(ln_r, ln_xray_property, deg)
 
-    fit = np.exp(logfit)
+    # polyval() is used to assemble cubic fit:
+    # $p(x) = c_0 + c_1 x + c_2 x^2 + c3 x^3$
+    # where c_n are the coeffs returned by polyfit()
+    ln_fit = poly.polyval(ln_r, coeffs)
+    fit = np.exp(ln_fit)
 
-    return fit
+    # Now use these coefficients to extrapolate fit
+    # across larger radius
 
+    ln_fit_fine = poly.polyval(ln_r_fine, coeffs)
+    fit_fine = np.exp(ln_fit_fine)
+
+    return fit, r, fit_fine, r_fine
+
+def extrapolate_radius(data):
+    '''
+    The ACCEPT radii are finite. Fix that. 
+    '''
+
+    r = (data['Rin'] + data['Rout']) * 0.5
+    ln_r = np.log(r.value)
+    # this is the NATURAL logarithm, ln    
+
+    # Generate the radii you wish to extrapolate
+    # across in log10 space
+    log10_r_fine = np.arange(300.)/100. - 3.
+
+    # Now un-log10 it, give it a unit
+    r_fine = (10**log10_r_fine) * u.Mpc
+
+    # Also give its unitless natural log, used for fitting
+    # with polyval() and fit_polynomial()'s coefficients
+    ln_r_fine = np.log(r_fine.value)
+
+    return r, ln_r, r_fine, log10_r_fine, ln_r_fine
 
 def logTemp_fit(data):
     '''
     Fit the logarithmic electron density profile ln(n_e) (in cm^-3)
-    to a polynomial in log r (in Mpc) of degree 'deg'.
-    The array 'coeffs' returns the coefficients of that polynomial fit.
+    to a polynomial in log r (in Mpc) of degree 'deg'. Plot it.
     '''
-    whatIsFit = "ln kT (keV) in log radius (Mpc)"
+    whatIsFit = "log temperature profile"
     deg = 3
 
-    r = (data['Rin'] + data['Rout']) * 0.5
-    logr = np.log(r.value)
-    # this is the NATURAL logarithm, ln
+    ln_t = np.log(data['Tx'].value)
+    ln_terr = np.log(data['Txerr'] / data['Tx'])
 
-    logt = np.log(data['Tx'].value)
-    logterr = np.log(data['Txerr'] / data['Tx'])
+    upperbound = data['Tx'] + data['Txerr']
+    lowerbound = data['Tx'] - data['Txerr']
 
-    fit = fit_polynomial(logr, logt, deg, whatIsFit)
+    fit, r, fit_fine, r_fine = fit_polynomial(data, ln_t, deg, whatIsFit)
+
+
+    prettyplot()
 
     plt.figure()
-    plt.plot(r.to(u.kpc), data['Tx'], marker='o', markersize=5, linestyle='None')
+    plt.plot(r.to(u.kpc), data['Tx'], marker='o', markersize=10, linestyle='None')
 
     ax = plt.gca()
-    ax.set_yscale('log')
+    #ax.set_yscale('log')
     ax.set_xscale('log')
+    ax.set_xlim(1,300)
     #ax.set_ylim(1,10)
 
-    #plt.fill_between(r, data['Tx']+data['Txerr'], data['Tx']-data['Txerr'], facecolor='blue', alpha=0.5)
+    plt.xlabel('Test')
+    plt.title('Projected X-ray Temperature')
+
+    #plt.errorbar(r.to(u.kpc).value, data['Tx'].value, data['Txerr'].value)
+
+    plt.fill_between(r.to(u.kpc).value, lowerbound.value, upperbound.value, facecolor='gray', alpha=0.5)
     plt.plot(r.to(u.kpc), fit)
+    plt.plot(r_fine.to(u.kpc), fit_fine, linestyle='--')
     plt.show(block=True)
- 
+
+
+def prettyplot():
+    '''Plots should be pretty'''
+
+    plt.rcParams['font.family'] = 'serif'
+    plt.rcParams['font.serif'] = 'Ubuntu'
+    plt.rcParams['font.monospace'] = 'Ubuntu Mono'
+    plt.rcParams['font.size'] = 15
+    plt.rcParams['axes.labelsize'] = 16
+    plt.rcParams['axes.labelweight'] = 'bold'
+    plt.rcParams['xtick.labelsize'] = 16
+    plt.rcParams['ytick.labelsize'] = 16
+    plt.rcParams['legend.fontsize'] = 10
+    plt.rcParams['figure.titlesize'] = 12
+    plt.rcParams['axes.linewidth'] = 2
+
+    style.use('fivethirtyeight')
+
 
 def coolingFunction(kT):
     '''
