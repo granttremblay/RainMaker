@@ -67,6 +67,7 @@ def main():
     data = parse_data_table(filename, cluster_name)
 
     logTemp_fit(data)
+    logPressure_fit(data)
 
 
 def parse_arguments():
@@ -75,13 +76,13 @@ def parse_arguments():
     parser = argparse.ArgumentParser(description=
                                      "Rainmaker fits ACCEPT profiles to quantify \
                                      parameters relevant to precipitation",
-                                     usage="rainmaker.py -f table.txt -n 'Cluster'")
+                                     usage="rainmaker.py -f table.txt -n name")
 
     parser.add_argument("-f", "--filename",
-                        dest="filename", 
+                        dest="filename",
                         required=False,
                         default="accept_main_table.txt",
-                        help="input file with data (default: accept_main_table.txt)",
+                        help="input data table",
                         metavar="FILE",
                         type=lambda x: is_valid_file(parser, x))
 
@@ -240,14 +241,15 @@ def fit_polynomial(data, ln_xray_property, deg, whatIsFit):
 
     return fit, r, fit_fine, r_fine
 
+
 def extrapolate_radius(data):
     '''
-    The ACCEPT radii are finite. Fix that. 
+    The ACCEPT radii are finite. Fix that.
     '''
 
     r = (data['Rin'] + data['Rout']) * 0.5
     ln_r = np.log(r.value)
-    # this is the NATURAL logarithm, ln    
+    # this is the NATURAL logarithm, ln
 
     # Generate the radii you wish to extrapolate
     # across in log10 space
@@ -261,6 +263,7 @@ def extrapolate_radius(data):
     ln_r_fine = np.log(r_fine.value)
 
     return r, ln_r, r_fine, log10_r_fine, ln_r_fine
+
 
 def logTemp_fit(data):
     '''
@@ -278,7 +281,6 @@ def logTemp_fit(data):
 
     fit, r, fit_fine, r_fine = fit_polynomial(data, ln_t, deg, whatIsFit)
 
-
     prettyplot()
 
     plt.figure()
@@ -294,6 +296,42 @@ def logTemp_fit(data):
     plt.title('Projected X-ray Temperature')
 
     #plt.errorbar(r.to(u.kpc).value, data['Tx'].value, data['Txerr'].value)
+
+    plt.fill_between(r.to(u.kpc).value, lowerbound.value, upperbound.value, facecolor='gray', alpha=0.5)
+    plt.plot(r.to(u.kpc), fit)
+    plt.plot(r_fine.to(u.kpc), fit_fine, linestyle='--')
+    plt.show(block=True)
+
+
+def logPressure_fit(data):
+    '''
+    Fit the logarithmic electron density profile ln(n_e) (in cm^-3)
+    to a polynomial in log r (in Mpc) of degree 'deg'. Plot it.
+    '''
+    whatIsFit = "log pressure profile"
+    deg = 3
+
+    ln_p = np.log(data['Pitpl'].value)
+    ln_perr = np.log(data['Perr'] / data['Pitpl'])
+
+    upperbound = data['Pitpl'] + data['Perr']
+    lowerbound = data['Pitpl'] - data['Perr']
+
+    fit, r, fit_fine, r_fine = fit_polynomial(data, ln_p, deg, whatIsFit)
+
+    prettyplot()
+
+    plt.figure()
+    plt.plot(r.to(u.kpc), data['Pitpl'], marker='o', markersize=10, linestyle='None')
+
+    ax = plt.gca()
+    #ax.set_yscale('log')
+    ax.set_xscale('log')
+    #ax.set_xlim(1,300)
+    #ax.set_ylim(1,10)
+
+    plt.xlabel('Test')
+    plt.title('Projected X-ray Pressure')
 
     plt.fill_between(r.to(u.kpc).value, lowerbound.value, upperbound.value, facecolor='gray', alpha=0.5)
     plt.plot(r.to(u.kpc), fit)
