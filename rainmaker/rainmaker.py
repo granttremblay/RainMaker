@@ -287,12 +287,12 @@ def logTemp_fit(data):
     plt.plot(r.to(u.kpc), data['Tx'], marker='o', markersize=10, linestyle='None')
 
     ax = plt.gca()
-    #ax.set_yscale('log')
+    ax.set_yscale('log')
     ax.set_xscale('log')
-    ax.set_xlim(1,300)
-    #ax.set_ylim(1,10)
+    ax.set_xlim(1,100)
+    ax.set_ylim(1,10)
 
-    plt.xlabel('Test')
+    plt.xlabel('Cluster-centric Radius (kpc)')
     plt.title('Projected X-ray Temperature')
 
     #plt.errorbar(r.to(u.kpc).value, data['Tx'].value, data['Txerr'].value)
@@ -325,12 +325,13 @@ def logPressure_fit(data):
     plt.plot(r.to(u.kpc), data['Pitpl'], marker='o', markersize=10, linestyle='None')
 
     ax = plt.gca()
-    #ax.set_yscale('log')
+    # ax.set_yscale('log')
     ax.set_xscale('log')
-    #ax.set_xlim(1,300)
-    #ax.set_ylim(1,10)
+    # ax.set_xlim(1,300)
+    # ax.set_ylim(1,10)
 
-    plt.xlabel('Test')
+    plt.xlabel('Cluster-centric Radius (kpc)')
+    plt.ylabel('Projected X-ray Pressure')
     plt.title('Projected X-ray Pressure')
 
     plt.fill_between(r.to(u.kpc).value, lowerbound.value, upperbound.value, facecolor='gray', alpha=0.5)
@@ -342,19 +343,19 @@ def logPressure_fit(data):
 def prettyplot():
     '''Plots should be pretty'''
 
-    plt.rcParams['font.family'] = 'serif'
-    plt.rcParams['font.serif'] = 'Ubuntu'
-    plt.rcParams['font.monospace'] = 'Ubuntu Mono'
-    plt.rcParams['font.size'] = 15
-    plt.rcParams['axes.labelsize'] = 16
-    plt.rcParams['axes.labelweight'] = 'bold'
-    plt.rcParams['xtick.labelsize'] = 16
-    plt.rcParams['ytick.labelsize'] = 16
-    plt.rcParams['legend.fontsize'] = 10
-    plt.rcParams['figure.titlesize'] = 12
-    plt.rcParams['axes.linewidth'] = 2
+#    plt.rcParams['font.family'] = 'sans-serif'
+#    plt.rcParams['font.serif'] = 'Ubuntu'
+#    plt.rcParams['font.monospace'] = 'Ubuntu Mono'
+#    plt.rcParams['font.size'] = 14
+#    plt.rcParams['axes.labelsize'] = 14
+#    #plt.rcParams['axes.labelweight'] = 'bold'
+#    plt.rcParams['xtick.labelsize'] = 12
+#    plt.rcParams['ytick.labelsize'] = 12
+#    plt.rcParams['legend.fontsize'] = 10
+#    plt.rcParams['figure.titlesize'] = 12
+#    plt.rcParams['axes.linewidth'] = 2
 
-    style.use('fivethirtyeight')
+    style.use('ggplot')
 
 
 def coolingFunction(kT):
