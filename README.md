@@ -7,11 +7,15 @@ ___
 It works by fitting log temperature and density profiles to the [ACCEPT](http://www.pa.msu.edu/astro/MC2/accept/) table of cluster entropy profiles, originally compiled by [Cavagnolo et al. (2009)](https://ui.adsabs.harvard.edu/?#abs/2009ApJS..182...12C). 
 
 Because
-t_\mathrm{cool} \sim \frac{kT}{n\Lambda(T)}
+$t_\mathrm{cool} \sim \frac{kT}{n\Lambda(T)}$
+
 and
-t_\mathrm{FreeFall} \sim \frac{r}{\left( kT \times \left|\frac{d\ln{P}}{d\ln{r}}\right|\right)^{1/2}}, 
+
+$t_\mathrm{FreeFall} \sim \frac{r}{\left( kT \times \left|\frac{d\ln{P}}{d\ln{r}}\right|\right)^{1/2}},$
+
 the ratio between the two goes as
-\frac{t_\mathrm{cool}}{t_\mathrm{FreeFall}} \sim \left(\frac{1}{nr} \right ) \times \left( kT \right)^{3/2} \times [\Lambda(T)]^{-1} \times \left|\frac{d\ln{P}}{d\ln{r}}\right|^{1/2}. 
+
+$\frac{t_\mathrm{cool}}{t_\mathrm{FreeFall}} \sim \left(\frac{1}{nr} \right ) \times \left( kT \right)^{3/2} \times [\Lambda(T)]^{-1} \times \left|\frac{d\ln{P}}{d\ln{r}}\right|^{1/2}.$ 
 
 At radii of several tens of kpc in a cool-core cluster,
 the product of density times radius is roughly constant,
