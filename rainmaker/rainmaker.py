@@ -1,43 +1,27 @@
 #!/usr/bin/env python
 
 '''
-Rainmaker fits log density and temperature profiles to the ACCEPT
-tables from Cavagnolo et al.
+Rainmaker maps the cooling-to-freefall time ratio as a function
+of radius in Chandra X-ray observations of hot galaxy
+cluster atmospheres. This first iteration uses the main data table
+from the  ACCEPT sample: http://www.pa.msu.edu/astro/MC2/accept/
 
-It works by fitting third-order polynomials in log space to the
-temperature and pressure profiles, which is robust and usually
-gives a pretty good fit.  The logarithmic pressure profile is
-then  analytically differentiated to determine
-rg(r) = - (kT / mu m_p) (d ln P / d ln r),
-from which one gets the free-fall time.
+Projected radial X-ray temperature and density profiles
+are fit in log space with 3rd-order polynomials. The logarithmic
+pressure profile is then analytically differentiated to determine
+the gravitational acceleration, from which rainmaker then derives
+the freefall time. The cooling time is also computed from the
+temperature profile.
 
-In some instances, the best-fit pressure profile gets very flat
-or even reverses near the center, which is handled by preventing
-the derivative from going all the way to zero.  And to account
-for the presence of a BCG, the minimum value of g is set to be
-that of a singular isothermal sphere with a velocity dispersion
-of 250 km/s.  This correction is important only within ~ 10 kpc,
-if at all.
+Usage:
+    $ python rainmaker.py [-f data_table.txt -n "Name of cluster"]
 
-Notice that
-t_c ~ kT / n \Lambda(T)  and  t_ff ~ r / (kT | dlnP / dlnr |)^1/2 ,
-so their ratio is
-t_c / t_ff ~ (1/nr) (kT)^3/2 [\Lambda(T)]^{-1}  | dlnP / dlnr |^1/2
+Example:
+    $ python rainmaker.py
+    This will run the full sequence using Abell 2597 as an example.
 
-
-At radii of several tens of kpc in a cool-core cluster,
-the product of density times radius is roughly constant,
-so the value of this ratio will track the temperature gradient.
-However, we find that the density profile at smaller radii flattens
-out in our deprojected profiles, which causes the product nr to
-grow with radius and the timescale ratio to drop with radius.
-
-So the key thing to look at is the behavior of the product of
-radius and density at small radii.
-
-
-
--Grant Tremblay (Yale University)
+    $ python rainmaker.py -f accept_main_table.txt -n "Centaurus"
+    $ python rainmaker.py -n "Abell 2151"
 '''
 
 import os
@@ -74,7 +58,7 @@ def parse_arguments():
     '''Set up and parse command line arguments.'''
 
     parser = argparse.ArgumentParser(description=
-                                     "Rainmaker fits ACCEPT profiles to quantify \
+                                    "Rainmaker fits ACCEPT profiles to quantify \
                                      parameters relevant to precipitation",
                                      usage="rainmaker.py -f table.txt -n name")
 
