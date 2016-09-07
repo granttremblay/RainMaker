@@ -14,7 +14,7 @@ the freefall time. The cooling time is also computed from the
 temperature profile.
 
 Usage:
-    $ python rainmaker.py [-f data_table.txt -n "Name of cluster"]
+    $ python rainmaker.py [-f data_table.txt -n "Name of cluster" -p show_plots]
 
 Example:
     $ python rainmaker.py
@@ -22,6 +22,7 @@ Example:
 
     $ python rainmaker.py -f accept_main_table.txt -n "Centaurus"
     $ python rainmaker.py -n "Abell 2151"
+    $ python rainmaker.py -p False # don't show plots
 '''
 
 import os
@@ -43,7 +44,7 @@ def main():
     '''The main program runs the whole sequence.'''
 
     # Parse command line arguments. Iterate with user if cluster not found.
-    filename, cluster_name = parse_arguments()
+    filename, cluster_name, show_plots = parse_arguments()
 
     # DATA is an astropy TABLE object,
     # filtered to show all properties of a given cluster
@@ -76,8 +77,15 @@ def parse_arguments():
                         default="Abell 2597",
                         help="Name of the cluster (default: Abell 2597)")
 
+    parser.add_argument("-p", "--show_plots",
+                        dest="show_plots",
+                        required=False,
+                        default=True,
+                        help="Show plots upon running script?")
+
     args = parser.parse_args()
     filename = args.filename.name
+    show_plots = args.show_plots
 
     # Be flexible with the cluster name.
     # If they entered a space, replace it with a '_',
@@ -85,7 +93,7 @@ def parse_arguments():
 
     cluster_name = args.name_of_cluster.replace(" ", "_").upper()
 
-    return filename, cluster_name
+    return filename, cluster_name, show_plots
 
 
 def is_valid_file(parser, arg):
@@ -360,7 +368,7 @@ def plotter(x, y, x_fine, fit, fit_fine, lowerbound, upperbound,
     plt.ylabel(ylabel)
 
     # Show and save plots
-    plt.show(block=True)
+    plt.draw()
 
     if save:
         plt.savefig(plot_save_file)
@@ -424,3 +432,8 @@ if __name__ == '__main__':
     main()
     runtime = round((time.time() - start_time), 3)
     print("Finished in    |  {} seconds".format(runtime))
+
+
+    print("Showing plots  |")
+
+    plt.show()
