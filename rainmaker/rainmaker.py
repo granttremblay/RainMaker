@@ -255,6 +255,7 @@ def logTemp_fit(data):
     to a polynomial in log r (in Mpc) of degree 'deg'. Plot it.
     '''
     whatIsFit = "log temperature profile"
+
     deg = 3
 
     ln_t = np.log(data['Tx'].value)
@@ -265,26 +266,22 @@ def logTemp_fit(data):
 
     fit, r, fit_fine, r_fine = fit_polynomial(data, ln_t, deg, whatIsFit)
 
-    prettyplot()
-
-    plt.figure()
-    plt.plot(r.to(u.kpc), data['Tx'], marker='o', markersize=10, linestyle='None')
-
-    ax = plt.gca()
-    ax.set_yscale('log')
-    ax.set_xscale('log')
-    ax.set_xlim(1,100)
-    ax.set_ylim(1,10)
-
-    plt.xlabel('Cluster-centric Radius (kpc)')
-    plt.title('Projected X-ray Temperature')
-
-    #plt.errorbar(r.to(u.kpc).value, data['Tx'].value, data['Txerr'].value)
-
-    plt.fill_between(r.to(u.kpc).value, lowerbound.value, upperbound.value, facecolor='gray', alpha=0.5)
-    plt.plot(r.to(u.kpc), fit)
-    plt.plot(r_fine.to(u.kpc), fit_fine, linestyle='--')
-    plt.show(block=True)
+    plotter(r.to(u.kpc), 
+            data['Tx'],
+            r_fine.to(u.kpc), 
+            fit, 
+            fit_fine, 
+            lowerbound, 
+            upperbound,
+            xlog=True, 
+            ylog=True,
+            xlim=None, 
+            ylim=None, 
+            xlabel="Cluster-centric Radius (kpc)",
+            ylabel="Projected X-ray Temperature (keV)",
+            file="temperature.pdf",
+            save=False
+            )
 
 
 def logPressure_fit(data):
@@ -293,6 +290,10 @@ def logPressure_fit(data):
     to a polynomial in log r (in Mpc) of degree 'deg'. Plot it.
     '''
     whatIsFit = "log pressure profile"
+    whatIsPlot = "Projected X-ray Pressure"
+
+    plot_save_file = "pressure.pdf"
+
     deg = 3
 
     ln_p = np.log(data['Pitpl'].value)
@@ -303,44 +304,66 @@ def logPressure_fit(data):
 
     fit, r, fit_fine, r_fine = fit_polynomial(data, ln_p, deg, whatIsFit)
 
-    prettyplot()
+    plotter(r.to(u.kpc), 
+            data['Pitpl'],
+            r_fine.to(u.kpc), 
+            fit, 
+            fit_fine, 
+            lowerbound, 
+            upperbound,
+            xlog=True, 
+            ylog=True,
+            xlim=None, 
+            ylim=None, 
+            xlabel="Cluster-centric Radius (kpc)",
+            ylabel="Projected X-ray Pressure",
+            file="pressure.pdf",
+            save=False
+            )
 
-    plt.figure()
-    plt.plot(r.to(u.kpc), data['Pitpl'], marker='o', markersize=10, linestyle='None')
-
-    ax = plt.gca()
-    # ax.set_yscale('log')
-    ax.set_xscale('log')
-    # ax.set_xlim(1,300)
-    # ax.set_ylim(1,10)
-
-    plt.xlabel('Cluster-centric Radius (kpc)')
-    plt.ylabel('Projected X-ray Pressure')
-    plt.title('Projected X-ray Pressure')
-
-    plt.fill_between(r.to(u.kpc).value, lowerbound.value, upperbound.value, facecolor='gray', alpha=0.5)
-    plt.plot(r.to(u.kpc), fit)
-    plt.plot(r_fine.to(u.kpc), fit_fine, linestyle='--')
-    plt.show(block=True)
-
-
-def prettyplot():
+def plotter(x, y, x_fine, fit, fit_fine, lowerbound, upperbound, 
+            xlog=True, ylog=True, xlim=None, ylim=None, 
+            xlabel="Set your X-label!", ylabel="Set your y label!", file="temp.pdf", save=False):
     '''Plots should be pretty'''
 
-#    plt.rcParams['font.family'] = 'sans-serif'
-#    plt.rcParams['font.serif'] = 'Ubuntu'
-#    plt.rcParams['font.monospace'] = 'Ubuntu Mono'
-    plt.rcParams['font.size'] = 12
-    plt.rcParams['axes.labelsize'] = 12
-#    #plt.rcParams['axes.labelweight'] = 'bold'
-    plt.rcParams['xtick.labelsize'] = 12
-    plt.rcParams['ytick.labelsize'] = 12
-#    plt.rcParams['legend.fontsize'] = 10
-#    plt.rcParams['figure.titlesize'] = 12
-#    plt.rcParams['axes.linewidth'] = 2
-
+    # We'll use the R ggplot style, which follows Tufte-isms
     style.use('ggplot')
 
+    # Make things clear and readable
+    plt.rcParams['font.size'] = 12
+    plt.rcParams['axes.labelsize'] = 12
+    plt.rcParams['xtick.labelsize'] = 12
+    plt.rcParams['ytick.labelsize'] = 12
+
+    plt.figure()
+
+    # Plot data and fits
+    plt.plot(x, y, marker='o', markersize=10, linestyle='None')
+    plt.fill_between(x.value, lowerbound.value, upperbound.value, facecolor='gray', alpha=0.5)
+    plt.plot(x, fit)
+    plt.plot(x_fine, fit_fine, linestyle='--')
+
+    # Fiddle with axes, etc. 
+    ax = plt.gca()
+
+    if xlog:
+        ax.set_xscale('log')
+    if ylog:
+        ax.set_yscale('log')
+
+    if xlim is not None:
+        ax.set_xlim(xlim)
+    if ylim is not None:
+        ax.set_ylim(ylim)
+
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+
+    # Show and save plots
+    plt.show(block=True)
+
+    if save:
+        plt.savefig(plot_save_file)
 
 def coolingFunction(kT):
     '''
@@ -374,20 +397,6 @@ def coolingFunction(kT):
                        )*1e-22
 
     return coolingFunction
-
-
-def plotter(x, y):
-
-    plt.rcParams.update({'font.size': 22,
-                         'axes.labelsize': 20,
-                         'legend.fontsize': 16,
-                         'xtick.labelsize': 18,
-                         'ytick.labelsize': 18,
-                         'axes.linewidth': 2})
-
-    fig, ax = plt.subplots()
-    ax.plot(x, y, 'b--', marker='s', label=r"$y = \alpha^2$")
-
 
 def make_number_ordinal(number):
     '''Take number, turn into ordinal. E.g., "2" --> "2nd" '''
