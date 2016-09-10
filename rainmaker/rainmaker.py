@@ -287,6 +287,7 @@ def logTemp_fit(data):
             ylim=None, 
             xlabel="Cluster-centric Radius (kpc)",
             ylabel="Projected X-ray Temperature (keV)",
+            title="Temperature Fit",
             file="temperature.pdf",
             save=False
             )
@@ -325,13 +326,14 @@ def logPressure_fit(data):
             ylim=None, 
             xlabel="Cluster-centric Radius (kpc)",
             ylabel="Projected X-ray Pressure",
+            title="Pressure Fit",
             file="pressure.pdf",
             save=False
             )
 
 def plotter(x, y, x_fine, fit, fit_fine, lowerbound, upperbound, 
             xlog=True, ylog=True, xlim=None, ylim=None, 
-            xlabel="Set your X-label!", ylabel="Set your y label!", file="temp.pdf", save=False):
+            xlabel="Set your X-label!", ylabel="Set your y label!", title="Set your title!", file="temp.pdf", save=False):
     '''Plots should be pretty'''
 
     # We'll use the R ggplot style, which follows Tufte-isms
@@ -366,6 +368,7 @@ def plotter(x, y, x_fine, fit, fit_fine, lowerbound, upperbound,
 
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
+    plt.title(title)
 
     # Show and save plots
     plt.draw()
@@ -405,6 +408,7 @@ def coolingFunction(kT):
                        )*1e-22
 
     return coolingFunction
+
 
 def make_number_ordinal(number):
     '''Take number, turn into ordinal. E.g., "2" --> "2nd" '''
