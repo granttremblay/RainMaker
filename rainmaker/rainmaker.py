@@ -6,7 +6,7 @@ of radius in Chandra X-ray observations of hot galaxy
 cluster atmospheres. This first iteration uses the main data table
 from the  ACCEPT sample: http://www.pa.msu.edu/astro/MC2/accept/
 
-Projected radial X-ray temperature and density profiles
+Projected radial X-ray temperature and pressure profiles
 are fit in log space with 3rd-order polynomials. The logarithmic
 pressure profile is then analytically differentiated to determine
 the gravitational acceleration, from which rainmaker then derives
@@ -231,7 +231,7 @@ def fit_polynomial(data, ln_xray_property, deg, whatIsFit):
     ln_fit_fine = poly.polyval(ln_r_fine, coeffs)
     fit_fine = np.exp(ln_fit_fine)
 
-    return fit, r, fit_fine, r_fine
+    return fit, r, fit_fine, r_fine, coeffs
 
 
 def extrapolate_radius(data):
@@ -272,7 +272,9 @@ def logTemp_fit(data):
     upperbound = data['Tx'] + data['Txerr']
     lowerbound = data['Tx'] - data['Txerr']
 
-    fit, r, fit_fine, r_fine = fit_polynomial(data, ln_t, deg, whatIsFit)
+    fit, r, fit_fine, r_fine, temp_coeffs = fit_polynomial(data, ln_t, deg, whatIsFit)
+
+    print(len(temp_coeffs))
 
     plotter(r.to(u.kpc), 
             data['Tx'],
@@ -311,7 +313,7 @@ def logPressure_fit(data):
     upperbound = data['Pitpl'] + data['Perr']
     lowerbound = data['Pitpl'] - data['Perr']
 
-    fit, r, fit_fine, r_fine = fit_polynomial(data, ln_p, deg, whatIsFit)
+    fit, r, fit_fine, r_fine, pressure_coeffs = fit_polynomial(data, ln_p, deg, whatIsFit)
 
     plotter(r.to(u.kpc), 
             data['Pitpl'],
@@ -330,6 +332,13 @@ def logPressure_fit(data):
             file="pressure.pdf",
             save=False
             )
+
+
+def grav_accel():
+    '''Analytic differentiation of the log pressure profile'''
+    pass
+
+
 
 def plotter(x, y, x_fine, fit, fit_fine, lowerbound, upperbound, 
             xlog=True, ylog=True, xlim=None, ylim=None, 
