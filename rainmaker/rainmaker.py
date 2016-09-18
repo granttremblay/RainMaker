@@ -35,6 +35,7 @@ import numpy.polynomial.polynomial as poly
 from astropy.io import ascii
 from astropy.table import QTable
 import astropy.units as u
+import astropy.constants as const
 
 import matplotlib.pyplot as plt
 import matplotlib.style as style
@@ -51,8 +52,8 @@ def main():
     # Can be split by e.g. data['Rin'], data['Mgrav'], etc.
     data = parse_data_table(filename, cluster_name)
 
-    logTemp_fit(data)
-    logPressure_fit(data)
+    grav_accel(data)
+
 
 
 def parse_arguments():
@@ -272,15 +273,16 @@ def logTemp_fit(data):
     upperbound = data['Tx'] + data['Txerr']
     lowerbound = data['Tx'] - data['Txerr']
 
-    fit, r, fit_fine, r_fine, temp_coeffs = fit_polynomial(data, ln_t, deg, whatIsFit)
+    temp_fit, r, temp_fit_fine, r_fine, temp_coeffs = fit_polynomial(data, ln_t, deg, whatIsFit)
 
-    print(len(temp_coeffs))
+    temp_fit = temp_fit * u.keV
+    temp_fit_fine = temp_fit_fine * u.keV 
 
     plotter(r.to(u.kpc), 
             data['Tx'],
             r_fine.to(u.kpc), 
-            fit, 
-            fit_fine, 
+            temp_fit, 
+            temp_fit_fine, 
             lowerbound, 
             upperbound,
             xlog=True, 
@@ -293,6 +295,8 @@ def logTemp_fit(data):
             file="temperature.pdf",
             save=False
             )
+
+    return temp_coeffs, temp_fit, temp_fit_fine
 
 
 def logPressure_fit(data):
@@ -313,13 +317,18 @@ def logPressure_fit(data):
     upperbound = data['Pitpl'] + data['Perr']
     lowerbound = data['Pitpl'] - data['Perr']
 
-    fit, r, fit_fine, r_fine, pressure_coeffs = fit_polynomial(data, ln_p, deg, whatIsFit)
+    pressure_fit, r, pressure_fit_fine, r_fine, pressure_coeffs = fit_polynomial(data,
+                                                               ln_p,
+                                                               deg,
+                                                               whatIsFit)
+    pressure_fit = pressure_fit * u.dyne * u.cm**(-2)
+    pressure_fit_fine = pressure_fit_fine * u.dyne * u.cm**(-2)
 
     plotter(r.to(u.kpc), 
             data['Pitpl'],
             r_fine.to(u.kpc), 
-            fit, 
-            fit_fine, 
+            pressure_fit, 
+            pressure_fit_fine, 
             lowerbound, 
             upperbound,
             xlog=True, 
@@ -333,16 +342,89 @@ def logPressure_fit(data):
             save=False
             )
 
+    return pressure_coeffs, pressure_fit, pressure_fit_fine
 
-def grav_accel():
+
+def grav_accel(data):
     '''Analytic differentiation of the log pressure profile'''
-    pass
+
+    temp_coeffs, temp_fit, temp_fit_fine = logTemp_fit(data)
+    pressure_coeffs, pressure_fit, pressure_fit_fine = logPressure_fit(data)
+
+    r, ln_r, r_fine, log10_r_fine, ln_r_fine = extrapolate_radius(data)
+
+    # Assign the dlnp_dlnr array with same length as radius array
+    dlnp_dlnr = np.zeros(np.shape(ln_r))
+    for i in np.arange(1, 4):
+        dlnp_dlnr = dlnp_dlnr + float(i)*pressure_coeffs[i]*ln_r**(float(i-1))
 
 
+    dlnp_dlnr_fine = np.zeros(np.shape(ln_r_fine))
+    for i in np.arange(1, 4):
+        dlnp_dlnr_fine = dlnp_dlnr_fine + float(i)*pressure_coeffs[i]*ln_r_fine**(float(i-1))
 
-def plotter(x, y, x_fine, fit, fit_fine, lowerbound, upperbound, 
-            xlog=True, ylog=True, xlim=None, ylim=None, 
-            xlabel="Set your X-label!", ylabel="Set your y label!", title="Set your title!", file="temp.pdf", save=False):
+    mu_mp = const.m_p.to(u.g) # Proton mass 1.67e-24 g
+
+    rg = - temp_fit.to(u.erg) / mu_mp * dlnp_dlnr
+    rg_fine = -temp_fit_fine.to(u.erg) / mu_mp * dlnp_dlnr_fine
+
+    relerr = np.sqrt(2. * data['Perr'].value**2 + data['Txerr'].value**2)
+    rgerr = temp_fit.to(u.erg) / mu_mp * relerr
+
+    lowerbound = rg-rgerr
+    upperbound = rg+rgerr
+
+    plotter(r.to(u.kpc), 
+            np.zeros(np.shape(rg)),
+            r_fine.to(u.kpc),
+            rg,
+            rg_fine,
+            lowerbound,
+            upperbound,
+            xlog=True, 
+            ylog=True,
+            xlim=None, 
+            ylim=None, 
+            xlabel="Cluster-centric radius",
+            ylabel="rg in cgs",
+            title="Gravitational acceleration",
+            file="pressure.pdf",
+            save=False)
+
+
+#plotter(x, y, x_fine, fit, fit_fine, lowerbound, upperbound,
+#            xlog=True, ylog=True, xlim=None, ylim=None,
+#            xlabel="Set your X-label!", ylabel="Set your y label!",
+#            title="Set your title!", file="temp.pdf", save=False)
+
+
+#dlnp_dlnr =  0.0 * ln_rMpc
+# for i = 1,degp do dlnp_dlnr = dlnp_dlnr $
+#                           + float(i)*pcoeffs(i)*ln_rMpc^float(i-1)
+# dlnp_dlnr = dlnp_dlnr < (-1.0E-10)
+# print,dlnp_dlnr
+
+# dlnp_dlnr_fine =  0.0 * ln_rMpc_fine
+# for i = 1,degp do dlnp_dlnr_fine = dlnp_dlnr_fine $
+#                           + float(i)*pcoeffs(i)*ln_rMpc_fine^float(i-1)
+# dlnp_dlnr_fine = dlnp_dlnr_fine < (-1.0E-10)
+
+# mu_mp = 0.6 * 1.67D-24
+# rg = - kt_erg / mu_mp * dlnp_dlnr
+# rg_fine = - kt_erg_fine / mu_mp * dlnp_dlnr_fine
+# plot_oi,rMpc,rg,xtitle='r (Mpc)',ytitle = 'rg (cgs)'
+# oplot,rMpc_fine,rg_fine,line=3
+
+# relerr = sqrt(2.*exp(logperr)^2. + exp(logterr)^2.)
+# rgerr = kt_erg / mu_mp * relerr 
+# oplot,rMpc,rg+rgerr,line=1
+# oplot,rMpc,rg-rgerr,line=1
+
+
+def plotter(x, y, x_fine, fit, fit_fine, lowerbound, upperbound,
+            xlog=True, ylog=True, xlim=None, ylim=None,
+            xlabel="Set your X-label!", ylabel="Set your y label!",
+            title="Set your title!", file="temp.pdf", save=False):
     '''Plots should be pretty'''
 
     # We'll use the R ggplot style, which follows Tufte-isms
@@ -358,11 +440,12 @@ def plotter(x, y, x_fine, fit, fit_fine, lowerbound, upperbound,
 
     # Plot data and fits
     plt.plot(x, y, marker='o', markersize=10, linestyle='None')
-    plt.fill_between(x.value, lowerbound.value, upperbound.value, facecolor='gray', alpha=0.5)
+    plt.fill_between(x.value, lowerbound.value, upperbound.value,
+                     facecolor='gray', alpha=0.5)
     plt.plot(x, fit)
     plt.plot(x_fine, fit_fine, linestyle='--')
 
-    # Fiddle with axes, etc. 
+    # Fiddle with axes, etc.
     ax = plt.gca()
 
     if xlog:
@@ -382,8 +465,6 @@ def plotter(x, y, x_fine, fit, fit_fine, lowerbound, upperbound,
     # Show and save plots
     plt.draw()
 
-    if save:
-        plt.savefig(plot_save_file)
 
 def coolingFunction(kT):
     '''
@@ -445,7 +526,6 @@ if __name__ == '__main__':
     main()
     runtime = round((time.time() - start_time), 3)
     print("Finished in    |  {} seconds".format(runtime))
-
 
     print("Showing plots  |")
 
