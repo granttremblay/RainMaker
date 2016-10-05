@@ -287,7 +287,7 @@ def logTemp_fit(data):
             upperbound,
             xlog=True, 
             ylog=True,
-            xlim=None, 
+            xlim=(1,100), # Example: (1, 100) 
             ylim=None, 
             xlabel="Cluster-centric Radius (kpc)",
             ylabel="Projected X-ray Temperature (keV)",
@@ -358,10 +358,14 @@ def grav_accel(data):
     for i in np.arange(1, 4):
         dlnp_dlnr = dlnp_dlnr + float(i)*pressure_coeffs[i]*ln_r**(float(i-1))
 
+    #logpressure_clip = -1.0e-10
+    #dlnp_dlnr = np.clip(dlnp_dlnr, a_min=logpressure_clip, a_max=np.max(dlnp_dlnr))
 
     dlnp_dlnr_fine = np.zeros(np.shape(ln_r_fine))
     for i in np.arange(1, 4):
         dlnp_dlnr_fine = dlnp_dlnr_fine + float(i)*pressure_coeffs[i]*ln_r_fine**(float(i-1))
+
+    #dlnp_dlnr_fine = np.clip(dlnp_dlnr_fine, a_min=logpressure_clip, a_max=np.max(dlnp_dlnr_fine))
 
     mu_mp = const.m_p.to(u.g) # Proton mass 1.67e-24 g
 
@@ -375,16 +379,16 @@ def grav_accel(data):
     upperbound = rg+rgerr
 
     plotter(r.to(u.kpc), 
-            np.zeros(np.shape(rg)),
+            None,
             r_fine.to(u.kpc),
             rg,
             rg_fine,
             lowerbound,
             upperbound,
-            xlog=True, 
+            xlog=True,
             ylog=True,
-            xlim=None, 
-            ylim=None, 
+            xlim=(1.0, 100.),
+            ylim=(0, 1.2e16),
             xlabel="Cluster-centric radius",
             ylabel="rg in cgs",
             title="Gravitational acceleration",
@@ -426,11 +430,8 @@ def plotter(x, y, x_fine, fit, fit_fine, lowerbound, upperbound,
             xlabel="Set your X-label!", ylabel="Set your y label!",
             title="Set your title!", file="temp.pdf", save=False):
     '''Plots should be pretty'''
-
-    # We'll use the R ggplot style, which follows Tufte-isms
     style.use('ggplot')
 
-    # Make things clear and readable
     plt.rcParams['font.size'] = 12
     plt.rcParams['axes.labelsize'] = 12
     plt.rcParams['xtick.labelsize'] = 12
@@ -439,7 +440,12 @@ def plotter(x, y, x_fine, fit, fit_fine, lowerbound, upperbound,
     plt.figure()
 
     # Plot data and fits
-    plt.plot(x, y, marker='o', markersize=10, linestyle='None')
+
+    # Only plot actual data points if I give you data points
+    if y is not None:
+        plt.plot(x, y, marker='o', markersize=10, linestyle='None')
+
+    # Plot a nice error shadow
     plt.fill_between(x.value, lowerbound.value, upperbound.value,
                      facecolor='gray', alpha=0.5)
     plt.plot(x, fit)
