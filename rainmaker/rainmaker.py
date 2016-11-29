@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
 '''
+Map precipitation thresholds in Chandra X-ray observations of galaxy clusters.
+
 Rainmaker maps the cooling-to-freefall time ratio as a function
 of radius in Chandra X-ray observations of hot galaxy
 cluster atmospheres. This first iteration uses the main data table
@@ -24,6 +26,14 @@ Example:
     $ python rainmaker.py -n "Abell 2151"
     $ python rainmaker.py -p False # don't show plots
 '''
+
+__author__ = "Dr. Grant R. Tremblay"
+__license__ = "MIT"
+__version__ = "0.1.0"
+__maintainer__ = "Grant Tremblay"
+__email__ = "grant.tremblay@yale.edu"
+__status__ = "Development"
+
 
 import os
 import time
@@ -296,7 +306,7 @@ def logTemp_fit(data):
             save=False
             )
 
-    return temp_coeffs, temp_fit, temp_fit_fine
+    return temp_coeffs, temp_fit, temp_fit_fine, ln_terr
 
 
 def logPressure_fit(data):
@@ -342,14 +352,14 @@ def logPressure_fit(data):
             save=False
             )
 
-    return pressure_coeffs, pressure_fit, pressure_fit_fine
+    return pressure_coeffs, pressure_fit, pressure_fit_fine, ln_perr
 
 
 def grav_accel(data):
     '''Analytic differentiation of the log pressure profile'''
 
-    temp_coeffs, temp_fit, temp_fit_fine = logTemp_fit(data)
-    pressure_coeffs, pressure_fit, pressure_fit_fine = logPressure_fit(data)
+    temp_coeffs, temp_fit, temp_fit_fine, ln_terr = logTemp_fit(data)
+    pressure_coeffs, pressure_fit, pressure_fit_fine, ln_perr = logPressure_fit(data)
 
     r, ln_r, r_fine, log10_r_fine, ln_r_fine = extrapolate_radius(data)
 
@@ -372,8 +382,8 @@ def grav_accel(data):
     rg = - temp_fit.to(u.erg) / mu_mp * dlnp_dlnr
     rg_fine = -temp_fit_fine.to(u.erg) / mu_mp * dlnp_dlnr_fine
 
-    relerr = np.sqrt(2. * data['Perr'].value**2 + data['Txerr'].value**2)
-    rgerr = temp_fit.to(u.erg) / mu_mp * relerr
+    relerr = np.sqrt(2. * np.exp(ln_perr)**2 + np.exp(ln_terr)**2)
+    rgerr = (temp_fit.to(u.erg) / mu_mp) * relerr
 
     lowerbound = rg-rgerr
     upperbound = rg+rgerr
@@ -388,7 +398,7 @@ def grav_accel(data):
             xlog=True,
             ylog=True,
             xlim=(1.0, 100.),
-            ylim=(0, 1.2e16),
+            ylim=(1.0e13, 1.2e16),
             xlabel="Cluster-centric radius",
             ylabel="rg in cgs",
             title="Gravitational acceleration",
