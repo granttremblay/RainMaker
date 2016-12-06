@@ -328,23 +328,23 @@ def logPressure_fit(data):
     lowerbound = data['Pitpl'] - data['Perr']
 
     pressure_fit, r, pressure_fit_fine, r_fine, pressure_coeffs = fit_polynomial(data,
-                                                               ln_p,
-                                                               deg,
-                                                               whatIsFit)
+                                                                                 ln_p,
+                                                                                 deg,
+                                                                                 whatIsFit)
     pressure_fit = pressure_fit * u.dyne * u.cm**(-2)
     pressure_fit_fine = pressure_fit_fine * u.dyne * u.cm**(-2)
 
-    plotter(r.to(u.kpc), 
+    plotter(r.to(u.kpc),
             data['Pitpl'],
-            r_fine.to(u.kpc), 
-            pressure_fit, 
-            pressure_fit_fine, 
-            lowerbound, 
+            r_fine.to(u.kpc),
+            pressure_fit,
+            pressure_fit_fine,
+            lowerbound,
             upperbound,
-            xlog=True, 
+            xlog=True,
             ylog=True,
-            xlim=None, 
-            ylim=None, 
+            xlim=None,
+            ylim=None,
             xlabel="Cluster-centric Radius (kpc)",
             ylabel="Projected X-ray Pressure",
             title="Pressure Fit",

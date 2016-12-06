@@ -26,3 +26,6 @@ grow with radius and the timescale ratio to drop with radius.
 
 So the key thing to look at is the behavior of the product of
 radius and density at small radii.
+
+
+[![astropy](http://img.shields.io/badge/powered%20by-AstroPy-orange.svg?style=flat)](http://www.astropy.org/)
