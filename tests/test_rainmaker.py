@@ -45,6 +45,7 @@ class TestBasics(unittest.TestCase):
 
     def test_filter_by_cluster(self):
 
+        '''Filtering by cluster name should work'''
         filename = os.getcwd() + "/testdata/accept_main_table.txt"
         cluster_name = "ABELL_2597"
         data = ascii.read(filename)
