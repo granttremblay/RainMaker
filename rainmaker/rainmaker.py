@@ -51,20 +51,6 @@ import matplotlib.pyplot as plt
 import matplotlib.style as style
 
 
-def main():
-    '''The main program runs the whole sequence.'''
-
-    # Parse command line arguments. Iterate with user if cluster not found.
-    filename, cluster_name, show_plots = parse_arguments()
-
-    # DATA is an astropy TABLE object,
-    # filtered to show all properties of a given cluster
-    # Can be split by e.g. data['Rin'], data['Mgrav'], etc.
-    data = parse_data_table(filename, cluster_name)
-
-    grav_accel(data)
-
-
 
 def parse_arguments():
     '''Set up and parse command line arguments.'''
@@ -286,19 +272,19 @@ def logTemp_fit(data):
     temp_fit, r, temp_fit_fine, r_fine, temp_coeffs = fit_polynomial(data, ln_t, deg, whatIsFit)
 
     temp_fit = temp_fit * u.keV
-    temp_fit_fine = temp_fit_fine * u.keV 
+    temp_fit_fine = temp_fit_fine * u.keV
 
-    plotter(r.to(u.kpc), 
+    plotter(r.to(u.kpc),
             data['Tx'],
-            r_fine.to(u.kpc), 
-            temp_fit, 
-            temp_fit_fine, 
-            lowerbound, 
+            r_fine.to(u.kpc),
+            temp_fit,
+            temp_fit_fine,
+            lowerbound,
             upperbound,
-            xlog=True, 
+            xlog=True,
             ylog=True,
-            xlim=(1,100), # Example: (1, 100) 
-            ylim=None, 
+            xlim=(1,100), # Example: (1, 100)
+            ylim=None,
             xlabel="Cluster-centric Radius (kpc)",
             ylabel="Projected X-ray Temperature (keV)",
             title="Temperature Fit",
@@ -388,7 +374,7 @@ def grav_accel(data):
     lowerbound = rg-rgerr
     upperbound = rg+rgerr
 
-    plotter(r.to(u.kpc), 
+    plotter(r.to(u.kpc),
             None,
             r_fine.to(u.kpc),
             rg,
@@ -430,7 +416,7 @@ def grav_accel(data):
 # oplot,rMpc_fine,rg_fine,line=3
 
 # relerr = sqrt(2.*exp(logperr)^2. + exp(logterr)^2.)
-# rgerr = kt_erg / mu_mp * relerr 
+# rgerr = kt_erg / mu_mp * relerr
 # oplot,rMpc,rg+rgerr,line=1
 # oplot,rMpc,rg-rgerr,line=1
 
@@ -535,6 +521,22 @@ def rainmaker_notebook_init(filename, cluster_name):
     data = parse_data_table(filename, cluster_name.replace(" ", "_").upper())
 
     return data
+
+
+
+def main():
+    '''The main program runs the whole sequence.'''
+
+    # Parse command line arguments. Iterate with user if cluster not found.
+    filename, cluster_name, show_plots = parse_arguments()
+
+    # DATA is an astropy TABLE object,
+    # filtered to show all properties of a given cluster
+    # Can be split by e.g. data['Rin'], data['Mgrav'], etc.
+    data = parse_data_table(filename, cluster_name)
+
+    grav_accel(data)
+
 
 
 if __name__ == '__main__':
