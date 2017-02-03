@@ -52,7 +52,7 @@ __status__ = "Development"
 
 
 def parse_arguments():
-    '''Set up and parse command line arguments.'''
+    """Set up and parse command line arguments."""
 
     parser = argparse.ArgumentParser(description="Rainmaker fits ACCEPT profiles to quantify \
                                      parameters relevant to precipitation",
@@ -92,7 +92,7 @@ def parse_arguments():
 
 
 def is_valid_file(parser, arg):
-    '''Check to ensure existence of the file.'''
+    """Check to ensure existence of the file."""
     if not os.path.isfile(arg):
         parser.error("Cannot find that data table: {}".format(arg))
     else:
@@ -101,7 +101,7 @@ def is_valid_file(parser, arg):
 
 
 def parse_data_table(filename, cluster_name):
-    '''Match input cluster name to that in table, return that object's data'''
+    """Match input cluster name to that in table, return that object's data."""
     data = ascii.read(filename)     # This creates a flexible Astropy TABLE
 
     # 'tcool5/2' is a bad column name. Change it if there.
@@ -120,8 +120,7 @@ def parse_data_table(filename, cluster_name):
 
 
 def filter_by_cluster(data, cluster_name):
-    '''Takes input astropy TABLE object'''
-
+    """Takes input astropy TABLE object."""
     obs_by_name = data.group_by('Name')
     clusters_in_table = obs_by_name.groups.keys
 
@@ -149,10 +148,7 @@ def filter_by_cluster(data, cluster_name):
 
 
 def assign_units(data):
-
-    # I could probably do this in a more intelligent manner,
-    # but I want to assign units in a clear way!
-
+    """I need to write a docstring for this."""
     Name = data['Name']
     Rin = data['Rin'] * u.Mpc
     Rout = data['Rout'] * u.Mpc
@@ -197,14 +193,12 @@ def assign_units(data):
 
 
 def fit_polynomial(data, ln_xray_property, deg, whatIsFit):
-    '''
-    Fits a DEG-order polynomial in x, y space.
-    A 3rd order polynomial is a cubic function
+    """Fit a DEG-order polynomial in x, y space.
 
     poly.polyfit() returns coefficients, from 0th
     order first to N-th order last (note that this is
     *opposite* from how np.polyfit behaves!).
-    '''
+    """
     r, ln_r, r_fine, log10_r_fine, ln_r_fine = extrapolate_radius(data)
 
     print("Now fitting    |" + "  " + make_number_ordinal(deg) +
@@ -228,10 +222,7 @@ def fit_polynomial(data, ln_xray_property, deg, whatIsFit):
 
 
 def extrapolate_radius(data):
-    '''
-    The ACCEPT radii are finite. Fix that.
-    '''
-
+    """The ACCEPT radii are finite. Fix that."""
     r = (data['Rin'] + data['Rout']) * 0.5
     ln_r = np.log(r.value)
     # this is the NATURAL logarithm, ln
@@ -251,10 +242,11 @@ def extrapolate_radius(data):
 
 
 def logTemp_fit(data):
-    '''
+    """Fit the Temperature profile in log space.
+
     Fit the logarithmic electron density profile ln(n_e) (in cm^-3)
     to a polynomial in log r (in Mpc) of degree 'deg'. Plot it.
-    '''
+    """
     whatIsFit = "log temperature profile"
 
     deg = 3
@@ -293,10 +285,11 @@ def logTemp_fit(data):
 
 
 def logPressure_fit(data):
-    '''
+    """Fit the logarithmic electron density profile.
+
     Fit the logarithmic electron density profile ln(n_e) (in cm^-3)
     to a polynomial in log r (in Mpc) of degree 'deg'. Plot it.
-    '''
+    """
     whatIsFit = "log pressure profile"
     whatIsPlot = "Projected X-ray Pressure"
 
