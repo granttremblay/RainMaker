@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+"""/usr/bin/env python"""
 
 '''
 Map precipitation thresholds in Chandra X-ray observations of galaxy clusters.
@@ -27,14 +27,6 @@ Example:
     $ python rainmaker.py -p False # don't show plots
 '''
 
-__author__ = "Dr. Grant R. Tremblay"
-__license__ = "MIT"
-__version__ = "0.1.0"
-__maintainer__ = "Grant Tremblay"
-__email__ = "grant.tremblay@yale.edu"
-__status__ = "Development"
-
-
 import os
 import time
 import argparse
@@ -51,12 +43,18 @@ import matplotlib.pyplot as plt
 import matplotlib.style as style
 
 
+__author__ = "Dr. Grant R. Tremblay"
+__license__ = "MIT"
+__version__ = "0.1.0"
+__maintainer__ = "Grant Tremblay"
+__email__ = "grant.tremblay@yale.edu"
+__status__ = "Development"
+
 
 def parse_arguments():
     '''Set up and parse command line arguments.'''
 
-    parser = argparse.ArgumentParser(description=
-                                    "Rainmaker fits ACCEPT profiles to quantify \
+    parser = argparse.ArgumentParser(description="Rainmaker fits ACCEPT profiles to quantify \
                                      parameters relevant to precipitation",
                                      usage="rainmaker.py -f table.txt -n name")
 
@@ -95,7 +93,6 @@ def parse_arguments():
 
 def is_valid_file(parser, arg):
     '''Check to ensure existence of the file.'''
-
     if not os.path.isfile(arg):
         parser.error("Cannot find that data table: {}".format(arg))
     else:
@@ -105,7 +102,6 @@ def is_valid_file(parser, arg):
 
 def parse_data_table(filename, cluster_name):
     '''Match input cluster name to that in table, return that object's data'''
-
     data = ascii.read(filename)     # This creates a flexible Astropy TABLE
 
     # 'tcool5/2' is a bad column name. Change it if there.
@@ -132,18 +128,18 @@ def filter_by_cluster(data, cluster_name):
     cluster_found = cluster_name in clusters_in_table['Name']
 
     while not cluster_found:
-            new_cluster_name = input("Cluster (" + cluster_name +
-                                     ") not found, try again: ")
+        new_cluster_name = input("Cluster (" + cluster_name +
+                                 ") not found, try again: ")
 
-            messyname = (new_cluster_name.startswith('"') and
-                         new_cluster_name.endswith('"'))
+        messyname = (new_cluster_name.startswith('"') and
+                     new_cluster_name.endswith('"'))
 
-            # If the user entered quotation marks, strip them
-            if messyname:
-                cluster_name = new_cluster_name[1:-1].replace(' ', '_').upper()
-            else:
-                cluster_name = new_cluster_name.replace(' ', '_').upper()
-            cluster_found = cluster_name in clusters_in_table['Name']
+        # If the user entered quotation marks, strip them
+        if messyname:
+            cluster_name = new_cluster_name[1:-1].replace(' ', '_').upper()
+        else:
+            cluster_name = new_cluster_name.replace(' ', '_').upper()
+        cluster_found = cluster_name in clusters_in_table['Name']
 
     if cluster_found:
         print("Cluster found  |  " + cluster_name)
@@ -191,11 +187,11 @@ def assign_units(data):
     # that I can preserve units. Read more here:
     # http://docs.astropy.org/en/stable/table/mixin_columns.html#quantity-and-qtable
     data = QTable(
-                 [Name, Rin, Rout, nelec, neerr, Kitpl,
-                  Kflat, Kerr, Pitpl, Perr, Mgrav, Merr,
-                  Tx, Txerr, Lambda, tcool52, tcool52err,
-                  tcool32, tcool32err], names=names
-                )
+        [Name, Rin, Rout, nelec, neerr, Kitpl,
+         Kflat, Kerr, Pitpl, Perr, Mgrav, Merr,
+         Tx, Txerr, Lambda, tcool52, tcool52err,
+         tcool32, tcool32err], names=names
+    )
 
     return data
 
@@ -242,7 +238,7 @@ def extrapolate_radius(data):
 
     # Generate the radii you wish to extrapolate
     # across in log10 space
-    log10_r_fine = np.arange(300.)/100. - 3.
+    log10_r_fine = np.arange(300.) / 100. - 3.
 
     # Now un-log10 it, give it a unit
     r_fine = (10**log10_r_fine) * u.Mpc
@@ -269,7 +265,8 @@ def logTemp_fit(data):
     upperbound = data['Tx'] + data['Txerr']
     lowerbound = data['Tx'] - data['Txerr']
 
-    temp_fit, r, temp_fit_fine, r_fine, temp_coeffs = fit_polynomial(data, ln_t, deg, whatIsFit)
+    temp_fit, r, temp_fit_fine, r_fine, temp_coeffs = fit_polynomial(
+        data, ln_t, deg, whatIsFit)
 
     temp_fit = temp_fit * u.keV
     temp_fit_fine = temp_fit_fine * u.keV
@@ -283,7 +280,7 @@ def logTemp_fit(data):
             upperbound,
             xlog=True,
             ylog=True,
-            xlim=(1,100), # Example: (1, 100)
+            xlim=(1, 100),  # Example: (1, 100)
             ylim=None,
             xlabel="Cluster-centric Radius (kpc)",
             ylabel="Projected X-ray Temperature (keV)",
@@ -345,25 +342,28 @@ def grav_accel(data):
     '''Analytic differentiation of the log pressure profile'''
 
     temp_coeffs, temp_fit, temp_fit_fine, ln_terr = logTemp_fit(data)
-    pressure_coeffs, pressure_fit, pressure_fit_fine, ln_perr = logPressure_fit(data)
+    pressure_coeffs, pressure_fit, pressure_fit_fine, ln_perr = logPressure_fit(
+        data)
 
     r, ln_r, r_fine, log10_r_fine, ln_r_fine = extrapolate_radius(data)
 
     # Assign the dlnp_dlnr array with same length as radius array
     dlnp_dlnr = np.zeros(np.shape(ln_r))
     for i in np.arange(1, 4):
-        dlnp_dlnr = dlnp_dlnr + float(i)*pressure_coeffs[i]*ln_r**(float(i-1))
+        dlnp_dlnr = dlnp_dlnr + \
+            float(i) * pressure_coeffs[i] * ln_r**(float(i - 1))
 
     #logpressure_clip = -1.0e-10
     #dlnp_dlnr = np.clip(dlnp_dlnr, a_min=logpressure_clip, a_max=np.max(dlnp_dlnr))
 
     dlnp_dlnr_fine = np.zeros(np.shape(ln_r_fine))
     for i in np.arange(1, 4):
-        dlnp_dlnr_fine = dlnp_dlnr_fine + float(i)*pressure_coeffs[i]*ln_r_fine**(float(i-1))
+        dlnp_dlnr_fine = dlnp_dlnr_fine + \
+            float(i) * pressure_coeffs[i] * ln_r_fine**(float(i - 1))
 
     #dlnp_dlnr_fine = np.clip(dlnp_dlnr_fine, a_min=logpressure_clip, a_max=np.max(dlnp_dlnr_fine))
 
-    mu_mp = const.m_p.to(u.g) # Proton mass 1.67e-24 g
+    mu_mp = const.m_p.to(u.g)  # Proton mass 1.67e-24 g
 
     rg = - temp_fit.to(u.erg) / mu_mp * dlnp_dlnr
     rg_fine = -temp_fit_fine.to(u.erg) / mu_mp * dlnp_dlnr_fine
@@ -371,8 +371,8 @@ def grav_accel(data):
     relerr = np.sqrt(2. * np.exp(ln_perr)**2 + np.exp(ln_terr)**2)
     rgerr = (temp_fit.to(u.erg) / mu_mp) * relerr
 
-    lowerbound = rg-rgerr
-    upperbound = rg+rgerr
+    lowerbound = rg - rgerr
+    upperbound = rg + rgerr
 
     plotter(r.to(u.kpc),
             None,
@@ -392,7 +392,7 @@ def grav_accel(data):
             save=False)
 
 
-#plotter(x, y, x_fine, fit, fit_fine, lowerbound, upperbound,
+# plotter(x, y, x_fine, fit, fit_fine, lowerbound, upperbound,
 #            xlog=True, ylog=True, xlim=None, ylim=None,
 #            xlabel="Set your X-label!", ylabel="Set your y label!",
 #            title="Set your title!", file="temp.pdf", save=False)
@@ -494,10 +494,10 @@ def coolingFunction(kT):
     beta = 0.5
 
     coolingFunction = (
-                       (C1 * (kT / keV)**alpha) +
-                       (C2 * (kT / keV)**beta) +
-                       (C3)
-                       )*1e-22
+        (C1 * (kT / keV)**alpha) +
+        (C2 * (kT / keV)**beta) +
+        (C3)
+    ) * 1e-22
 
     return coolingFunction
 
@@ -523,7 +523,6 @@ def rainmaker_notebook_init(filename, cluster_name):
     return data
 
 
-
 def main():
     '''The main program runs the whole sequence.'''
 
@@ -536,7 +535,6 @@ def main():
     data = parse_data_table(filename, cluster_name)
 
     grav_accel(data)
-
 
 
 if __name__ == '__main__':
