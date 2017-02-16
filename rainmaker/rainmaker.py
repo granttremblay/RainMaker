@@ -1,4 +1,4 @@
-"""/usr/bin/env python"""
+#!/usr/bin/env python
 
 '''
 Map precipitation thresholds in Chandra X-ray observations of galaxy clusters.
@@ -25,8 +25,6 @@ Example:
     $ python rainmaker.py -f accept_main_table.txt -n "Centaurus"
     $ python rainmaker.py -n "Abell 2151"
     $ python rainmaker.py -p False # don't show plots
-
-    TEST
 '''
 
 import os
