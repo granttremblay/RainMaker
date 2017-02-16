@@ -3,6 +3,7 @@
 
 [![astropy](http://img.shields.io/badge/powered%20by-AstroPy-orange.svg?style=flat)](http://www.astropy.org/)
 [![Build Status](https://travis-ci.org/granttremblay/rainmaker.svg?branch=master)](https://travis-ci.org/granttremblay/rainmaker)
+[![Coverage Status](https://coveralls.io/repos/github/granttremblay/rainmaker/badge.svg?branch=master)](https://coveralls.io/github/granttremblay/rainmaker?branch=master)
 
 [Dr. Grant R. Tremblay](www.granttremblay.com) | Einstein Fellow | [Yale University](www.yale.edu) | *grant.tremblay @ yale.edu*
 ___

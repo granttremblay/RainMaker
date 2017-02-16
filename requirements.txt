@@ -2,3 +2,4 @@ astropy
 numpy
 matplotlib
 python-coveralls
+coverage
