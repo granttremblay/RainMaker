@@ -33,7 +33,7 @@ http://docs.python-guide.org/en/latest/writing/structure/
 '''
 
 filename = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                        'testdata.txt')
+                        'testdata/testdata.txt')
 cluster_name = 'ABELL_2597'
 
 print(os.path.dirname(os.path.realpath(__file__)))
