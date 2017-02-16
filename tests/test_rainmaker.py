@@ -32,22 +32,23 @@ can be properly imported.
 http://docs.python-guide.org/en/latest/writing/structure/
 '''
 
+filename = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                        'testdata.txt')
+cluster_name = 'ABELL_2597'
+
+print(os.path.dirname(os.path.realpath(__file__)))
+print(os.path.realpath(__file__))
 
 class TestBasics(unittest.TestCase):
     '''Test basic functionality to ensure the code is alive'''
 
     def test_parse_data_table(self):
-        filename = "accept_main_table.txt"
-        cluster_name = "ABELL_2597"
 
         returned_data = rainmaker.parse_data_table(filename, cluster_name)
         self.assertTrue(cluster_name in returned_data['Name'])
 
     def test_filter_by_cluster(self):
 
-        '''Filtering by cluster name should work'''
-        filename = "accept_main_table.txt"
-        cluster_name = "ABELL_2597"
         data = ascii.read(filename)
 
         masked_data = rainmaker.filter_by_cluster(data, cluster_name)
@@ -56,7 +57,6 @@ class TestBasics(unittest.TestCase):
 
     def test_assign_units(self):
 
-        filename = "accept_main_table.txt"
         data = rainmaker.parse_data_table(filename, "ABELL_2597")
 
         massValue = data['Mgrav'][0]
@@ -67,8 +67,6 @@ class TestBasics(unittest.TestCase):
 
     def test_fit_polynomial(self):
 
-        filename = "accept_main_table.txt"
-        cluster_name = "ABELL_2597"
         data = ascii.read(filename)
         data = rainmaker.parse_data_table(filename, "ABELL_2597")
 
