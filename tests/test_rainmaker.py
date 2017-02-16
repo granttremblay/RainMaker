@@ -62,7 +62,8 @@ class TestBasics(unittest.TestCase):
         massValue = data['Mgrav'][0]
         radiusValue = data['Rin'][0]
 
-        #self.assertTrue('solMass' is str(massValue.unit))
+        ismsol =  'solMass' is str(massValue.unit)
+        self.assertTrue(ismsol)
 
         Mpc_divides_correctly = radiusValue.unit / (u.pc * 1.0e6).to(u.Mpc)
         self.assertTrue(Mpc_divides_correctly == 1)
