@@ -4,6 +4,8 @@ python:
   - "3.5"
   - "3.6"
 # command to install dependencies
+notifications:
+    email: false
 install:
     - pip install -r requirements.txt
 # command to run tests
