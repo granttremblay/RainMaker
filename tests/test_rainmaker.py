@@ -32,9 +32,10 @@ can be properly imported.
 http://docs.python-guide.org/en/latest/writing/structure/
 '''
 
+cluster_name = 'ABELL_2597'
 filename = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                         'testdata/testdata.txt')
-cluster_name = 'ABELL_2597'
+
 
 print(os.path.dirname(os.path.realpath(__file__)))
 print(os.path.realpath(__file__))
