@@ -1,19 +1,18 @@
-try:
-    from setuptools import setup
-except ImportError:
-    from distutils.core import setup
+from distutils.core import setup
 
-config = {
-    'description': 'Rainmaker: a Python implementation of ',
-    'author': 'My Name',
-    'url': 'URL to get it at.',
-    'download_url': 'Where to download it.',
-    'author_email': 'My email.',
-    'version': '0.1',
-    'install_requires': ['nose'],
-    'packages': ['NAME'],
-    'scripts': [],
-    'name': 'projectname'
-}
-
-setup(**config)
+setup(
+    name='RainMaker',
+    version='0.1.0',
+    author='Grant R. Tremblay',
+    author_email='grant.tremblay@yale.edu',
+    packages=['rainmaker', 'towelstuff.test'],
+    scripts=['bin/stowe-towels.py','bin/wash-towels.py'],
+    url='https://github.com/granttremblay/RainMaker',
+    license='LICENSE.txt',
+    description='Map entropy profiles in X-ray observations of galaxy clusters',
+    long_description=open('README.md').read(),
+    install_requires=[
+        "astropy",
+        "numpy",
+    ],
+)

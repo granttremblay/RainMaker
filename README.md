@@ -1,6 +1,5 @@
 # RainMaker
 
-
 [![astropy](http://img.shields.io/badge/powered%20by-AstroPy-orange.svg?style=flat)](http://www.astropy.org/)
 [![Build Status](https://travis-ci.org/granttremblay/rainmaker.svg?branch=master)](https://travis-ci.org/granttremblay/rainmaker)
 [![Coverage Status](https://coveralls.io/repos/github/granttremblay/rainmaker/badge.svg)](https://coveralls.io/github/granttremblay/rainmaker)
