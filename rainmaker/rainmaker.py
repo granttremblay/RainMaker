@@ -195,7 +195,14 @@ def fit_polynomial(data, ln_xray_property, deg, whatIsFit):
     order first to N-th order last (note that this is
     *opposite* from how np.polyfit behaves!).
     """
-    r, ln_r, r_fine, log10_r_fine, ln_r_fine = extrapolate_radius(data)
+
+    radiuspackage = extrapolate_radius(data)
+
+    r = radiuspackage[0]
+    ln_r = radiuspackage[1]
+    r_fine = radiuspackage[2]
+    log10_r_fine = radiuspackage[3]
+    ln_r_fine = radiuspackage[4]
 
     print("Now fitting    |" + "  " + make_number_ordinal(deg) +
           " order polynomial to " + whatIsFit)
@@ -236,7 +243,9 @@ def extrapolate_radius(data):
     # with polyval() and fit_polynomial()'s coefficients
     ln_r_fine = np.log(r_fine.value)
 
-    return r, ln_r, r_fine, log10_r_fine, ln_r_fine
+    radiuspackage = (r, ln_r, r_fine, log10_r_fine, ln_r_fine)
+
+    return radiuspackage
 
 
 def logTemp_fit(data):
@@ -345,7 +354,13 @@ def grav_accel(data):
     pressure_coeffs, pressure_fit, pressure_fit_fine, ln_perr = logPressure_fit(
         data)
 
-    r, ln_r, r_fine, log10_r_fine, ln_r_fine = extrapolate_radius(data)
+    radiuspackage = extrapolate_radius(data)
+
+    r = radiuspackage[0]
+    ln_r = radiuspackage[1]
+    r_fine = radiuspackage[2]
+    log10_r_fine = radiuspackage[3]
+    ln_r_fine = radiuspackage[4]
 
     # Assign the dlnp_dlnr array with same length as radius array
     dlnp_dlnr = np.zeros(np.shape(ln_r))
@@ -353,8 +368,8 @@ def grav_accel(data):
         dlnp_dlnr = dlnp_dlnr + \
             float(i) * pressure_coeffs[i] * ln_r**(float(i - 1))
 
-    #logpressure_clip = -1.0e-10
-    #dlnp_dlnr = np.clip(dlnp_dlnr, a_min=logpressure_clip, a_max=np.max(dlnp_dlnr))
+    # logpressure_clip = -1.0e-10
+    # dlnp_dlnr = np.clip(dlnp_dlnr, a_min=logpressure_clip, a_max=np.max(dlnp_dlnr))
 
     dlnp_dlnr_fine = np.zeros(np.shape(ln_r_fine))
     for i in np.arange(1, 4):
