@@ -406,6 +406,10 @@ def grav_accel(data):
             file="pressure.pdf",
             save=False)
 
+    # Return everything you need for the rest of the code
+    rgpackage = (r, ln_r, r_fine, log10_r_fine, ln_r_fine, rg, rg_fine, rgerr)
+
+    return rgpackage
 
 # plotter(x, y, x_fine, fit, fit_fine, lowerbound, upperbound,
 #            xlog=True, ylog=True, xlim=None, ylim=None,
