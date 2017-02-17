@@ -37,8 +37,7 @@ filename = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                         'testdata/testdata.txt')
 
 
-print(os.path.dirname(os.path.realpath(__file__)))
-print(os.path.realpath(__file__))
+
 
 class TestBasics(unittest.TestCase):
     '''Test basic functionality to ensure the code is alive'''
@@ -68,7 +67,6 @@ class TestBasics(unittest.TestCase):
 
     def test_fit_polynomial(self):
 
-        data = ascii.read(filename)
         data = rainmaker.parse_data_table(filename, "ABELL_2597")
 
         ln_t = np.log(data['Tx'].value)
@@ -85,6 +83,17 @@ class TestBasics(unittest.TestCase):
 
         number = rainmaker.make_number_ordinal(28)
         self.assertTrue('28th' == number)
+
+    def test_extrapolate_radius(self):
+
+        data = rainmaker.parse_data_table(filename, "ABELL_2597")
+
+        radiuspackage = rainmaker.extrapolate_radius(data)
+        expected = 300
+        actual = len(radiuspackage[3])
+
+        self.assertEqual(expected, actual,
+                              'Radius package should have 300 elements')
 
 
 if __name__ == '__main__':
