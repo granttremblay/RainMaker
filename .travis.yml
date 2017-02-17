@@ -6,6 +6,7 @@ python:
 # command to install dependencies
 notifications:
     email: false
+    slack: tremblaygroup:TX82JQ0OMByzMmc3dJFYwWUV
 install:
     - pip install -r requirements.txt
 # command to run tests
