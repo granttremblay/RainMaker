@@ -175,10 +175,6 @@ def assign_units(data):
              'tcool32', 't32err'
              )
 
-    # Yes, I know I could do this in a for loop. But I want to
-    # enable granular control over what columns are ultimately
-    # written into the final "Science-ready" data table.
-
     # Note, this is an astropy QTable instead of a Table, so
     # that I can preserve units. Read more here:
     # http://docs.astropy.org/en/stable/table/mixin_columns.html#quantity-and-qtable
@@ -218,7 +214,9 @@ def fit_polynomial(data, ln_xray_property, deg, whatIsFit):
     ln_fit_fine = poly.polyval(ln_r_fine, coeffs)
     fit_fine = np.exp(ln_fit_fine)
 
-    return fit, r, fit_fine, r_fine, coeffs
+    fitpackage = (fit, r, fit_fine, r_fine, coeffs)
+
+    return fitpackage
 
 
 def extrapolate_radius(data):
@@ -257,8 +255,13 @@ def logTemp_fit(data):
     upperbound = data['Tx'] + data['Txerr']
     lowerbound = data['Tx'] - data['Txerr']
 
-    temp_fit, r, temp_fit_fine, r_fine, temp_coeffs = fit_polynomial(
-        data, ln_t, deg, whatIsFit)
+    fitpackage = fit_polynomial(data, ln_t, deg, whatIsFit)
+
+    temp_fit = fitpackage[0]
+    r = fitpackage[1]
+    temp_fit_fine = fitpackage[2]
+    r_fine = fitpackage[3]
+    temp_coeffs = fitpackage[4]
 
     temp_fit = temp_fit * u.keV
     temp_fit_fine = temp_fit_fine * u.keV
@@ -303,10 +306,14 @@ def logPressure_fit(data):
     upperbound = data['Pitpl'] + data['Perr']
     lowerbound = data['Pitpl'] - data['Perr']
 
-    pressure_fit, r, pressure_fit_fine, r_fine, pressure_coeffs = fit_polynomial(data,
-                                                                                 ln_p,
-                                                                                 deg,
-                                                                                 whatIsFit)
+    fitpackage = fit_polynomial(data, ln_p, deg, whatIsFit)
+
+    pressure_fit = fitpackage[0]
+    r = fitpackage[1]
+    pressure_fit_fine = fitpackage[2]
+    r_fine = fitpackage[3]
+    pressure_coeffs = fitpackage[4]
+
     pressure_fit = pressure_fit * u.dyne * u.cm**(-2)
     pressure_fit_fine = pressure_fit_fine * u.dyne * u.cm**(-2)
 
