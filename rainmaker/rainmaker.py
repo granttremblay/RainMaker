@@ -401,43 +401,61 @@ def grav_accel(data):
             xlim=(1.0, 100.),
             ylim=(1.0e13, 1.2e16),
             xlabel="Cluster-centric radius",
-            ylabel="rg in cgs",
+            ylabel=r'$rg$ (cm$^2$ s$^{-2}$)',
             title="Gravitational acceleration",
             file="pressure.pdf",
             save=False)
 
     # Return everything you need for the rest of the code
-    rgpackage = (r, ln_r, r_fine, log10_r_fine, ln_r_fine, rg, rg_fine, rgerr)
+    rgpackage = {'r' : r, 'ln_r' : ln_r, 'r_fine': r_fine,
+                 'log10_r_fine' : log10_r_fine, 'ln_r_fine' : ln_r_fine,
+                 'rg' : rg, 'rg_fine' : rg_fine, 'rgerr' : rgerr
+                }
 
     return rgpackage
 
-# plotter(x, y, x_fine, fit, fit_fine, lowerbound, upperbound,
-#            xlog=True, ylog=True, xlim=None, ylim=None,
-#            xlabel="Set your X-label!", ylabel="Set your y label!",
-#            title="Set your title!", file="temp.pdf", save=False)
 
+def freefall_time(data):
 
-#dlnp_dlnr =  0.0 * ln_rMpc
-# for i = 1,degp do dlnp_dlnr = dlnp_dlnr $
-#                           + float(i)*pcoeffs(i)*ln_rMpc^float(i-1)
-# dlnp_dlnr = dlnp_dlnr < (-1.0E-10)
-# print,dlnp_dlnr
+    rgpackage = grav_accel(data)
 
-# dlnp_dlnr_fine =  0.0 * ln_rMpc_fine
-# for i = 1,degp do dlnp_dlnr_fine = dlnp_dlnr_fine $
-#                           + float(i)*pcoeffs(i)*ln_rMpc_fine^float(i-1)
-# dlnp_dlnr_fine = dlnp_dlnr_fine < (-1.0E-10)
+    tff_fine = np.sqrt(2.0 / rgpackage['rg_fine']) * rgpackage['r_fine']
+    # FINISH ME HERE
 
-# mu_mp = 0.6 * 1.67D-24
-# rg = - kt_erg / mu_mp * dlnp_dlnr
-# rg_fine = - kt_erg_fine / mu_mp * dlnp_dlnr_fine
-# plot_oi,rMpc,rg,xtitle='r (Mpc)',ytitle = 'rg (cgs)'
-# oplot,rMpc_fine,rg_fine,line=3
+    pass
 
-# relerr = sqrt(2.*exp(logperr)^2. + exp(logterr)^2.)
-# rgerr = kt_erg / mu_mp * relerr
-# oplot,rMpc,rg+rgerr,line=1
-# oplot,rMpc,rg-rgerr,line=1
+def coolingFunction(kT):
+    '''
+    Implement the Tozzi & Norman (2001) cooling function,
+    which is an analytic fit to Sutherland & Dopita (1993).
+
+    This is shown in Equation 16 of Parrish, Quataert,
+    & Sharma (2009), as well as Guo & Oh (2014).
+
+    See here: arXiv:0706.1274. The equation is:
+
+    $\Lambda(T) = [C_1 \left( \frac{k_B T}{\mathrm{keV}} \right)^{-1.7}
+                  + C_2\left( \frac{k_B T}{\mathrm{keV}} \right)^{0.5}
+                  + C_3] \times 10^{-22}$
+    '''
+
+    keV = u.eV * 1000.0
+
+    # For a metallicity of Z = 0.3 Z_solar,
+    C1 = 8.6e-3 * u.erg / (u.cm**3 * u.s)
+    C2 = 5.8e-3 * u.erg / (u.cm**3 * u.s)
+    C3 = 6.3e-2 * u.erg / (u.cm**3 * u.s)
+
+    alpha = -1.7
+    beta = 0.5
+
+    coolingFunction = (
+        (C1 * (kT / keV)**alpha) +
+        (C2 * (kT / keV)**beta) +
+        (C3)
+    ) * 1e-22
+
+    return coolingFunction
 
 
 def plotter(x, y, x_fine, fit, fit_fine, lowerbound, upperbound,
@@ -487,38 +505,7 @@ def plotter(x, y, x_fine, fit, fit_fine, lowerbound, upperbound,
     plt.draw()
 
 
-def coolingFunction(kT):
-    '''
-    Implement the Tozzi & Norman (2001) cooling function,
-    which is an analytic fit to Sutherland & Dopita (1993).
 
-    This is shown in Equation 16 of Parrish, Quataert,
-    & Sharma (2009), as well as Guo & Oh (2014).
-
-    See here: arXiv:0706.1274. The equation is:
-
-    $\Lambda(T) = [C_1 \left( \frac{k_B T}{\mathrm{keV}} \right)^{-1.7}
-                  + C_2\left( \frac{k_B T}{\mathrm{keV}} \right)^{0.5}
-                  + C_3] \times 10^{-22}$
-    '''
-
-    keV = u.eV * 1000.0
-
-    # For a metallicity of Z = 0.3 Z_solar,
-    C1 = 8.6e-3 * u.erg / (u.cm**3 * u.s)
-    C2 = 5.8e-3 * u.erg / (u.cm**3 * u.s)
-    C3 = 6.3e-2 * u.erg / (u.cm**3 * u.s)
-
-    alpha = -1.7
-    beta = 0.5
-
-    coolingFunction = (
-        (C1 * (kT / keV)**alpha) +
-        (C2 * (kT / keV)**beta) +
-        (C3)
-    ) * 1e-22
-
-    return coolingFunction
 
 
 def make_number_ordinal(number):
@@ -553,7 +540,8 @@ def main():
     # Can be split by e.g. data['Rin'], data['Mgrav'], etc.
     data = parse_data_table(filename, cluster_name)
 
-    grav_accel(data)
+    #grav_accel(data)
+    freefall_time(data)
 
 
 if __name__ == '__main__':
