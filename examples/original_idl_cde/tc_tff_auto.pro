@@ -66,7 +66,7 @@ end
 
 
 
-; Routine LOGTEMP fits the logarithmic ACCEPT electron density profile 
+; Routine LOGTEMP fits the logarithmic ACCEPT electron density profile
 ;  ln n_e (in cm^-3) to a polynomial in log r (in Mpc) of degree DEG.
 ;  The vector COEFFS returns the coefficients of that polynomial fit.
 
@@ -99,7 +99,7 @@ return
 end
 
 
-; Routine LOGTEMP fits the logarithmic ACCEPT temperature profile 
+; Routine LOGTEMP fits the logarithmic ACCEPT temperature profile
 ;  ln kT (in keV) to a polynomial in log r (in Mpc) of degree DEG.
 ;  The vector COEFFS returns the coefficients of that polynomial fit.
 
@@ -132,9 +132,9 @@ return
 end
 
 
-; Routine LOGPRESSURE fits the logarithmic ACCEPT electron pressure 
-;  profile ln P_e (in erg cm^-3) to a polynomial in log r (in Mpc) of 
-;  degree DEG.  The vector COEFFS returns the coefficients of 
+; Routine LOGPRESSURE fits the logarithmic ACCEPT electron pressure
+;  profile ln P_e (in erg cm^-3) to a polynomial in log r (in Mpc) of
+;  degree DEG.  The vector COEFFS returns the coefficients of
 ;  that polynomial fit.
 
 pro logpressure_fit,profiles,r,deg,coeffs,pfit,logperr
@@ -168,7 +168,7 @@ end
 
 ; Routine RG_DATA determines the gravitational potential corresponding to
 ;  fits (PFIT and TFIT) to the ACCEPT pressure and temperature profiles.
-;  RG gives the potential as the radius times the gravitational 
+;  RG gives the potential as the radius times the gravitational
 ;  acceleration in cgs units.
 
 pro rg_data,profiles,rMpc,rg,tfit,pfit,rgerr, $
@@ -222,7 +222,7 @@ plot_oi,rMpc,rg,xtitle='r (Mpc)',ytitle = 'rg (cgs)'
 oplot,rMpc_fine,rg_fine,line=3
 
 relerr = sqrt(2.*exp(logperr)^2. + exp(logterr)^2.)
-rgerr = kt_erg / mu_mp * relerr 
+rgerr = kt_erg / mu_mp * relerr
 oplot,rMpc,rg+rgerr,line=1
 oplot,rMpc,rg-rgerr,line=1
 stop
@@ -230,7 +230,7 @@ return
 end
 
 
-; Routine LAMBDA_TN03 gives the cooling function for of Tozzi & 
+; Routine LAMBDA_TN03 gives the cooling function for of Tozzi &
 ;  Norman (2001) to the Sutherland & Dopita cooling function for
 ;  0.3 solar metallicity:  LAMBDA_CGS in cgs units.
 
@@ -246,10 +246,10 @@ return
 end
 
 ; Routine TC_TFF_AUTO gives the ratio of cooling time to free-fall time
-;  derived from fits to ACCEPT profiles.  
+;  derived from fits to ACCEPT profiles.
 
 pro tc_tff_auto,name
-;accept_parse,name ; THIS IS NO LONGER NEEDED! 
+;accept_parse,name ; THIS IS NO LONGER NEEDED!
 file = 'ACCEPT_profiles/'+strtrim(name)+'_profiles.dat'
 accept_read,file,profiles
 rg_data,profiles,rMpc,rg,tfit,pfit,rgerr, $
@@ -310,5 +310,3 @@ oplot,rMpc,mass*(1-rgerr/rg),line=1
 
 return
 end
-
-

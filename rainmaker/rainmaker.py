@@ -338,7 +338,7 @@ def logPressure_fit(data):
             xlim=None,
             ylim=None,
             xlabel="Cluster-centric Radius (kpc)",
-            ylabel="Projected X-ray Pressure",
+            ylabel=r'Projected X-ray Pressure (erg cm$^{-3}$)',
             title="Pressure Fit",
             file="pressure.pdf",
             save=False
@@ -407,9 +407,9 @@ def grav_accel(data):
             save=False)
 
     # Return everything you need for the rest of the code
-    rgpackage = {'r' : r, 'ln_r' : ln_r, 'r_fine': r_fine,
-                 'log10_r_fine' : log10_r_fine, 'ln_r_fine' : ln_r_fine,
-                 'rg' : rg, 'rg_fine' : rg_fine, 'rgerr' : rgerr
+    rgpackage = {'r': r, 'ln_r': ln_r, 'r_fine': r_fine,
+                 'log10_r_fine': log10_r_fine, 'ln_r_fine': ln_r_fine,
+                 'rg': rg, 'rg_fine': rg_fine, 'rgerr': rgerr
                 }
 
     return rgpackage
@@ -419,10 +419,22 @@ def freefall_time(data):
 
     rgpackage = grav_accel(data)
 
+    tff = np.sqrt(2.0 / rgpackage['rg']) * rgpackage['r']
     tff_fine = np.sqrt(2.0 / rgpackage['rg_fine']) * rgpackage['r_fine']
     # FINISH ME HERE
 
-    pass
+    plt.figure()
+    plt.plot(rgpackage['r'].to(u.kpc), tff.to(u.yr))
+    plt.plot(rgpackage['r_fine'].to(u.kpc), tff_fine.to(u.yr), linestyle='--')
+
+    ax = plt.gca()
+    plt.xlabel("Radius")
+    plt.ylabel("Freefall Time")
+    plt.title("Hello")
+
+    # Show and save plots
+    plt.draw()
+
 
 def coolingFunction(kT):
     '''
@@ -479,8 +491,10 @@ def plotter(x, y, x_fine, fit, fit_fine, lowerbound, upperbound,
         plt.plot(x, y, marker='o', markersize=10, linestyle='None')
 
     # Plot a nice error shadow
-    plt.fill_between(x.value, lowerbound.value, upperbound.value,
-                     facecolor='gray', alpha=0.5)
+    if lowerbound is not None:
+        plt.fill_between(x.value, lowerbound.value, upperbound.value,
+                         facecolor='gray', alpha=0.5)
+
     plt.plot(x, fit)
     plt.plot(x_fine, fit_fine, linestyle='--')
 
