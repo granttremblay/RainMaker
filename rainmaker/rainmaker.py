@@ -428,7 +428,7 @@ def grav_accel(data):
     rgpackage = {'r': r, 'ln_r': ln_r, 'r_fine': r_fine,
                  'log10_r_fine': log10_r_fine, 'ln_r_fine': ln_r_fine,
                  'rg': rg, 'rg_fine': rg_fine, 'rgerr': rgerr
-                }
+                 }
 
     return rgpackage
 
@@ -457,23 +457,29 @@ def coolingFunction(kT):
     alpha = -1.7
     beta = 0.5
 
-    #c1 = 8.6d-3
-    #c2 = 5.8d-2
-    #c3 = 6.3d-2
+    # c1 = 8.6d-3
+    # c2 = 5.8d-2
+    # c3 = 6.3d-2
     #alpha = -1.7
     #beta = 0.5
-    #lambda = c1*kt_kev^alpha + c2*kt_kev^beta + c3
-    #lambda_cgs = lambda * 1.0d-22
+    # lambda = c1*kt_kev^alpha + c2*kt_kev^beta + c3
+    # lambda_cgs = lambda * 1.0d-22
 
-    coolingFunction = (C1*kT.value**alpha
-                       + C2*kT.value**beta
+    coolingFunction = (C1 * kT.value**alpha
+                       + C2 * kT.value**beta
                        + C3
                        ) * 1.0e-22 * (u.erg * u.cm**3 / u.s)
 
     return coolingFunction
 
-def timescales(data):
 
+def timescales(data):
+    '''
+    Compute the cooling and freefall timescales.
+
+    Do this from the log temperature and pressure profiles,
+    as well as the Tozzi & Norman cooling function.
+    '''
     rgpackage = grav_accel(data)
     pressurepackage = logPressure_fit(data)
     temppackage = logTemp_fit(data)
@@ -484,19 +490,20 @@ def timescales(data):
 
     # Compute the cooling time
 
-    nelec = pressurepackage['pressure_fit'] / (temppackage['temp_fit'] * 1.602e-9)
+    nelec = pressurepackage['pressure_fit'] / \
+        (temppackage['temp_fit'] * 1.602e-9)
     # That mysterious factor of 1.602e-9? see eqn 4 here:
     # https://arxiv.org/pdf/astro-ph/0608423.pdf
 
     capital_lambda = coolingFunction(temppackage['temp_fit'])
-    tcool = (3/2) * (1.89 * pressurepackage['pressure_fit']) / (nelec**2 / 1.07) / capital_lambda
+    tcool = (3 / 2) * (1.89 *
+                       pressurepackage['pressure_fit']) / (nelec**2 / 1.07) / capital_lambda
     # SOMETHING BROKEN HERE
 
-    #lambda_tn03,tfit,lambda_cgs
-    #nelec = pfit / (tfit*1.6d-9)
+    # lambda_tn03,tfit,lambda_cgs
+    # nelec = pfit / (tfit*1.6d-9)
     #tc = 1.5 * (1.89 * pfit) / (nelec^2. / 1.07) / lambda_cgs
-    #oplot,rMpc,tc/3.15d7
-
+    # oplot,rMpc,tc/3.15d7
 
     plt.figure()
     plt.plot(rgpackage['r'].to(u.kpc), tff.to(u.yr), label='Freefall Time',
@@ -504,7 +511,6 @@ def timescales(data):
 
     plt.plot(rgpackage['r_fine'].to(u.kpc), tff_fine.to(u.yr), linestyle='--',
              color=plt.rcParams['axes.prop_cycle'].by_key()['color'][0])
-
 
     plt.plot(rgpackage['r'].to(u.kpc), (tcool.to(u.yr)), label='Cooling Time',
              color=plt.rcParams['axes.prop_cycle'].by_key()['color'][1])
@@ -519,8 +525,6 @@ def timescales(data):
 
     # Show and save plots
     plt.draw()
-
-
 
 
 def plotter(x, y, x_fine, fit, fit_fine, lowerbound, upperbound,
@@ -572,12 +576,8 @@ def plotter(x, y, x_fine, fit, fit_fine, lowerbound, upperbound,
     plt.draw()
 
 
-
-
-
 def make_number_ordinal(number):
     '''Take number, turn into ordinal. E.g., "2" --> "2nd" '''
-
     suffixes = {1: 'st', 2: 'nd', 3: 'rd'}
 
     if 10 <= number % 100 <= 20:
@@ -590,7 +590,6 @@ def make_number_ordinal(number):
 
 def rainmaker_notebook_init(filename, cluster_name):
     '''Run this in a Jupyter Notebook for exploration'''
-
     data = parse_data_table(filename, cluster_name.replace(" ", "_").upper())
 
     return data
@@ -607,7 +606,7 @@ def main():
     # Can be split by e.g. data['Rin'], data['Mgrav'], etc.
     data = parse_data_table(filename, cluster_name)
 
-    #grav_accel(data)
+    # grav_accel(data)
     timescales(data)
 
 
