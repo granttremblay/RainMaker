@@ -191,8 +191,8 @@ def assign_units(data):
 def fit_polynomial(data, ln_xray_property, deg, whatIsFit):
     """Fit a DEG-order polynomial in x, y space.
 
-    poly.polyfit() returns coefficients, from 0th
-    order first to N-th order last (note that this is
+    numpy.polynomial.polinomial.polyfit() returns coefficients,
+    from 0th order first to N-th order last (note that this is
     *opposite* from how np.polyfit behaves!).
     """
 
@@ -256,7 +256,9 @@ def logTemp_fit(data):
     """
     whatIsFit = "log temperature profile"
 
-    deg = 3
+    # The temperature fit should be 2nd order, as a 3rd order
+    # polynomial turns up again at small radii (which is not physical).
+    deg = 2
 
     ln_t = np.log(data['Tx'].value)
     ln_terr = np.log(data['Txerr'] / data['Tx'])
@@ -283,9 +285,9 @@ def logTemp_fit(data):
             lowerbound,
             upperbound,
             xlog=True,
-            ylog=True,
+            ylog=False,
             xlim=(1, 100),  # Example: (1, 100)
-            ylim=None,
+            ylim=(1, 5),
             xlabel="Cluster-centric Radius (kpc)",
             ylabel="Projected X-ray Temperature (keV)",
             title="Temperature Fit",
@@ -293,7 +295,12 @@ def logTemp_fit(data):
             save=False
             )
 
-    return temp_coeffs, temp_fit, temp_fit_fine, ln_terr
+    temppackage = {'temp_coeffs': temp_coeffs,
+                   'temp_fit': temp_fit,
+                   'temp_fit_fine': temp_fit_fine,
+                   'ln_terr': ln_terr}
+
+    return temppackage
 
 
 def logPressure_fit(data):
@@ -344,17 +351,28 @@ def logPressure_fit(data):
             save=False
             )
 
-    return pressure_coeffs, pressure_fit, pressure_fit_fine, ln_perr
+    pressurepackage = {'pressure_coeffs': pressure_coeffs,
+                       'pressure_fit': pressure_fit,
+                       'pressure_fit_fine': pressure_fit_fine,
+                       'ln_perr': ln_perr
+                       }
+
+    return pressurepackage
 
 
 def grav_accel(data):
     '''Analytic differentiation of the log pressure profile'''
 
-    temp_coeffs, temp_fit, temp_fit_fine, ln_terr = logTemp_fit(data)
-    pressure_coeffs, pressure_fit, pressure_fit_fine, ln_perr = logPressure_fit(
-        data)
-
+    temppackage = logTemp_fit(data)
+    pressurepackage = logPressure_fit(data)
     radiuspackage = extrapolate_radius(data)
+
+    temp_fit = temppackage['temp_fit']
+    temp_fit_fine = temppackage['temp_fit_fine']
+    ln_terr = temppackage['ln_terr']
+
+    pressure_coeffs = pressurepackage['pressure_coeffs']
+    ln_perr = pressurepackage['ln_perr']
 
     r = radiuspackage[0]
     ln_r = radiuspackage[1]
@@ -415,34 +433,13 @@ def grav_accel(data):
     return rgpackage
 
 
-def freefall_time(data):
-
-    rgpackage = grav_accel(data)
-
-    tff = np.sqrt(2.0 / rgpackage['rg']) * rgpackage['r']
-    tff_fine = np.sqrt(2.0 / rgpackage['rg_fine']) * rgpackage['r_fine']
-    # FINISH ME HERE
-
-    plt.figure()
-    plt.plot(rgpackage['r'].to(u.kpc), tff.to(u.yr))
-    plt.plot(rgpackage['r_fine'].to(u.kpc), tff_fine.to(u.yr), linestyle='--')
-
-    ax = plt.gca()
-    plt.xlabel("Radius")
-    plt.ylabel("Freefall Time")
-    plt.title("Hello")
-
-    # Show and save plots
-    plt.draw()
-
-
 def coolingFunction(kT):
     '''
-    Implement the Tozzi & Norman (2001) cooling function,
-    which is an analytic fit to Sutherland & Dopita (1993).
+    Implement the Tozzi & Norman (2001) cooling function.
 
-    This is shown in Equation 16 of Parrish, Quataert,
-    & Sharma (2009), as well as Guo & Oh (2014).
+    This is an analytic fit to Sutherland & Dopita (1993), shown
+    in Equation 16 of Parrish, Quataert, & Sharma (2009),
+    as well as Guo & Oh (2014).
 
     See here: arXiv:0706.1274. The equation is:
 
@@ -450,7 +447,6 @@ def coolingFunction(kT):
                   + C_2\left( \frac{k_B T}{\mathrm{keV}} \right)^{0.5}
                   + C_3] \times 10^{-22}$
     '''
-
     keV = u.eV * 1000.0
 
     # For a metallicity of Z = 0.3 Z_solar,
@@ -468,6 +464,30 @@ def coolingFunction(kT):
     ) * 1e-22
 
     return coolingFunction
+
+def timescales(data):
+
+    rgpackage = grav_accel(data)
+
+    tff = np.sqrt(2.0 / rgpackage['rg']) * rgpackage['r']
+    tff_fine = np.sqrt(2.0 / rgpackage['rg_fine']) * rgpackage['r_fine']
+    # FINISH ME HERE
+
+
+
+    plt.figure()
+    plt.plot(rgpackage['r'].to(u.kpc), tff.to(u.yr))
+    plt.plot(rgpackage['r_fine'].to(u.kpc), tff_fine.to(u.yr), linestyle='--')
+
+    ax = plt.gca()
+    plt.xlabel("Radius")
+    plt.ylabel("Freefall Time")
+    plt.title("Freefall & Cooling Time")
+
+    # Show and save plots
+    plt.draw()
+
+
 
 
 def plotter(x, y, x_fine, fit, fit_fine, lowerbound, upperbound,
@@ -555,7 +575,7 @@ def main():
     data = parse_data_table(filename, cluster_name)
 
     #grav_accel(data)
-    freefall_time(data)
+    timescales(data)
 
 
 if __name__ == '__main__':
