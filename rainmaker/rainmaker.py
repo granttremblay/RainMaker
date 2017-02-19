@@ -450,34 +450,64 @@ def coolingFunction(kT):
     keV = u.eV * 1000.0
 
     # For a metallicity of Z = 0.3 Z_solar,
-    C1 = 8.6e-3 * u.erg / (u.cm**3 * u.s)
-    C2 = 5.8e-3 * u.erg / (u.cm**3 * u.s)
-    C3 = 6.3e-2 * u.erg / (u.cm**3 * u.s)
+    C1 = 8.6e-3
+    C2 = 5.8e-3
+    C3 = 6.3e-2
 
     alpha = -1.7
     beta = 0.5
 
-    coolingFunction = (
-        (C1 * (kT / keV)**alpha) +
-        (C2 * (kT / keV)**beta) +
-        (C3)
-    ) * 1e-22
+    #c1 = 8.6d-3
+    #c2 = 5.8d-2
+    #c3 = 6.3d-2
+    #alpha = -1.7
+    #beta = 0.5
+    #lambda = c1*kt_kev^alpha + c2*kt_kev^beta + c3
+    #lambda_cgs = lambda * 1.0d-22
+
+    coolingFunction = (C1*kT.value**alpha
+                       + C2*kT.value**beta
+                       + C3
+                       ) * 1.0e-22 * (u.erg * u.cm**3 / u.s)
 
     return coolingFunction
 
 def timescales(data):
 
     rgpackage = grav_accel(data)
+    pressurepackage = logPressure_fit(data)
+    temppackage = logTemp_fit(data)
 
+    # Compute the freefall time
     tff = np.sqrt(2.0 / rgpackage['rg']) * rgpackage['r']
     tff_fine = np.sqrt(2.0 / rgpackage['rg_fine']) * rgpackage['r_fine']
-    # FINISH ME HERE
 
+    # Compute the cooling time
+
+    nelec = pressurepackage['pressure_fit'] / (temppackage['temp_fit'] * 1.602e-9)
+    # That mysterious factor of 1.602e-9? see eqn 4 here:
+    # https://arxiv.org/pdf/astro-ph/0608423.pdf
+
+    capital_lambda = coolingFunction(temppackage['temp_fit'])
+    tcool = (3/2) * (1.89 * pressurepackage['pressure_fit']) / (nelec**2 / 1.07) / capital_lambda
+    # SOMETHING BROKEN HERE
+
+    #lambda_tn03,tfit,lambda_cgs
+    #nelec = pfit / (tfit*1.6d-9)
+    #tc = 1.5 * (1.89 * pfit) / (nelec^2. / 1.07) / lambda_cgs
+    #oplot,rMpc,tc/3.15d7
 
 
     plt.figure()
-    plt.plot(rgpackage['r'].to(u.kpc), tff.to(u.yr))
-    plt.plot(rgpackage['r_fine'].to(u.kpc), tff_fine.to(u.yr), linestyle='--')
+    plt.plot(rgpackage['r'].to(u.kpc), tff.to(u.yr), label='Freefall Time',
+             color=plt.rcParams['axes.prop_cycle'].by_key()['color'][0])
+
+    plt.plot(rgpackage['r_fine'].to(u.kpc), tff_fine.to(u.yr), linestyle='--',
+             color=plt.rcParams['axes.prop_cycle'].by_key()['color'][0])
+
+
+    plt.plot(rgpackage['r'].to(u.kpc), (tcool.to(u.yr)), label='Cooling Time',
+             color=plt.rcParams['axes.prop_cycle'].by_key()['color'][1])
 
     ax = plt.gca()
     ax.set_yscale('log')
@@ -485,6 +515,7 @@ def timescales(data):
     plt.xlabel("Radius")
     plt.ylabel("yr")
     plt.title("Freefall & Cooling Time")
+    plt.legend()
 
     # Show and save plots
     plt.draw()
