@@ -361,8 +361,7 @@ def logPressure_fit(data):
 
 
 def grav_accel(data):
-    '''Analytic differentiation of the log pressure profile'''
-
+    '''Compute the gravitational acceleration from the T and P profiles'''
     temppackage = logTemp_fit(data)
     pressurepackage = logPressure_fit(data)
     radiuspackage = extrapolate_radius(data)
