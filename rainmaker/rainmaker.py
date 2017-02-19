@@ -430,7 +430,7 @@ def grav_accel(data):
                  'rg': rg, 'rg_fine': rg_fine, 'rgerr': rgerr
                  }
 
-    return rgpackage
+    return rgpackage, temppackage, pressurepackage, radiuspackage
 
 
 def coolingFunction(kT):
@@ -480,9 +480,7 @@ def timescales(data):
     Do this from the log temperature and pressure profiles,
     as well as the Tozzi & Norman cooling function.
     '''
-    rgpackage = grav_accel(data)
-    pressurepackage = logPressure_fit(data)
-    temppackage = logTemp_fit(data)
+    rgpackage, temppackage, pressurepackage, radiuspackage = grav_accel(data)
 
     # Compute the freefall time
     tff = np.sqrt(2.0 / rgpackage['rg']) * rgpackage['r']
