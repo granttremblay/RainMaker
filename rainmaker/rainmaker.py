@@ -415,7 +415,7 @@ def grav_accel(data):
             lowerbound,
             upperbound,
             xlog=True,
-            ylog=True,
+            ylog=False,
             xlim=(1.0, 100.),
             ylim=(1.0e13, 1.2e16),
             xlabel="Cluster-centric radius",
@@ -480,8 +480,10 @@ def timescales(data):
     plt.plot(rgpackage['r_fine'].to(u.kpc), tff_fine.to(u.yr), linestyle='--')
 
     ax = plt.gca()
+    ax.set_yscale('log')
+    ax.set_xscale('log')
     plt.xlabel("Radius")
-    plt.ylabel("Freefall Time")
+    plt.ylabel("yr")
     plt.title("Freefall & Cooling Time")
 
     # Show and save plots
