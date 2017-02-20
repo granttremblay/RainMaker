@@ -42,6 +42,8 @@ import astropy.constants as const
 import matplotlib.pyplot as plt
 import matplotlib.style as style
 
+# Ignore sqrt warnings to keep interpreter clean
+np.seterr(divide='ignore', invalid='ignore')
 
 __author__ = "Dr. Grant R. Tremblay"
 __license__ = "MIT"
