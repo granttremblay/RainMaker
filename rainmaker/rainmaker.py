@@ -16,7 +16,7 @@ the freefall time. The cooling time is also computed from the
 temperature profile.
 
 Usage:
-    $ python rainmaker.py [-f data_table.txt -n "Name of cluster" -p show_plots]
+    $ python rainmaker.py [-f data_tab.txt -n "Name of cluster" -p show_plots]
 
 Example:
     $ python rainmaker.py
@@ -201,7 +201,6 @@ def fit_polynomial(data, ln_xray_property, deg, whatIsFit):
     r = radiuspackage[0]
     ln_r = radiuspackage[1]
     r_fine = radiuspackage[2]
-    log10_r_fine = radiuspackage[3]
     ln_r_fine = radiuspackage[4]
 
     print("Now fitting    |" + "  " + make_number_ordinal(deg) +
@@ -311,7 +310,6 @@ def logPressure_fit(data):
     to a polynomial in log r (in Mpc) of degree 'deg'. Plot it.
     """
     whatIsFit = "log pressure profile"
-    whatIsPlot = "Projected X-ray Pressure"
 
     plot_save_file = "pressure.pdf"
 
@@ -386,15 +384,10 @@ def grav_accel(data):
         dlnp_dlnr = dlnp_dlnr + \
             float(i) * pressure_coeffs[i] * ln_r**(float(i - 1))
 
-    # logpressure_clip = -1.0e-10
-    # dlnp_dlnr = np.clip(dlnp_dlnr, a_min=logpressure_clip, a_max=np.max(dlnp_dlnr))
-
     dlnp_dlnr_fine = np.zeros(np.shape(ln_r_fine))
     for i in np.arange(1, 4):
         dlnp_dlnr_fine = dlnp_dlnr_fine + \
             float(i) * pressure_coeffs[i] * ln_r_fine**(float(i - 1))
-
-    #dlnp_dlnr_fine = np.clip(dlnp_dlnr_fine, a_min=logpressure_clip, a_max=np.max(dlnp_dlnr_fine))
 
     mu_mp = const.m_p.to(u.g)  # Proton mass 1.67e-24 g
 
@@ -447,7 +440,6 @@ def coolingFunction(kT):
                   + C_2\left( \frac{k_B T}{\mathrm{keV}} \right)^{0.5}
                   + C_3] \times 10^{-22}$
     '''
-    keV = u.eV * 1000.0
 
     # For a metallicity of Z = 0.3 Z_solar,
     C1 = 8.6e-3
@@ -457,6 +449,8 @@ def coolingFunction(kT):
     alpha = -1.7
     beta = 0.5
 
+    # kT.value is supposed to be unitless,
+    # the kT in the real equation is divided by keV. I'm not cheating!
     coolingFunction = (C1 * kT.value**alpha
                        + C2 * kT.value**beta
                        + C3
@@ -512,19 +506,24 @@ def timescales(data):
              color=plt.rcParams['axes.prop_cycle'].by_key()['color'][0])
 
     # Plot the (various) coooling times
-    plt.plot(rgpackage['r'].to(u.kpc), (tcool.to(u.yr)), label='Cooling Time',
-             color=plt.rcParams['axes.prop_cycle'].by_key()['color'][1])
-    plt.plot(rgpackage['r_fine'].to(u.kpc), (tcool_fine.to(u.yr)), linestyle='--',
-             color=plt.rcParams['axes.prop_cycle'].by_key()['color'][1])
+    plt.plot(rgpackage['r'].to(u.kpc),
+             (tcool.to(u.yr)),
+             label='Cooling Time',
+             color=plt.rcParams['axes.prop_cycle'].by_key()['color'][1]
+             )
 
-    # plt.plot(rgpackage['r'].to(u.kpc), data['tcool32'].to(u.yr),
-    #         color=plt.rcParams['axes.prop_cycle'].by_key()['color'][2],
-    #        label='Cooling Time 3/2', linestyle='--')
-    # plt.fill_between(rgpackage['r'].to(u.kpc).value, tcool_lowerbound.value,
-    #                 tcool_upperbound.value, facecolor='gray', alpha=0.5)
+    plt.plot(rgpackage['r_fine'].to(u.kpc),
+             (tcool_fine.to(u.yr)),
+             linestyle='--',
+             color=plt.rcParams['axes.prop_cycle'].by_key()['color'][1]
+             )
 
-    plt.fill_between(rgpackage['r'].to(u.kpc).value, data['tcool52'].to(u.yr).value, data[
-                     'tcool32'].to(u.yr).value, facecolor='gray', alpha=0.5, label='Enthalpy / Energy difference')
+    plt.fill_between(rgpackage['r'].to(u.kpc).value,
+                     data['tcool52'].to(u.yr).value,
+                     data['tcool32'].to(u.yr).value,
+                     facecolor='gray', alpha=0.5,
+                     label='Enthalpy / Energy difference'
+                     )
 
     ax = plt.gca()
     ax.set_yscale('log')
