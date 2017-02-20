@@ -450,7 +450,7 @@ def coolingFunction(kT):
 
     # For a metallicity of Z = 0.3 Z_solar,
     C1 = 8.6e-3
-    C2 = 5.8e-3
+    C2 = 5.8e-2
     C3 = 6.3e-2
 
     alpha = -1.7
@@ -489,6 +489,8 @@ def timescales(data):
     capital_lambda = coolingFunction(temppackage['temp_fit'])
     capital_lambda_fine = coolingFunction(temppackage['temp_fit_fine'])
 
+
+    # What is all of this?! See Eqn. 35 here: See here: arXiv:0706.1274.
     tcool = (3 / 2) * (1.89 * pressurepackage['pressure_fit']) / (nelec**2 / 1.07) / capital_lambda
     tcool_fine = (3 / 2) * (1.89 * pressurepackage['pressure_fit_fine']) / (nelec_fine**2 / 1.07) / capital_lambda_fine
 
@@ -511,11 +513,13 @@ def timescales(data):
     plt.plot(rgpackage['r_fine'].to(u.kpc), (tcool_fine.to(u.yr)), linestyle='--',
              color=plt.rcParams['axes.prop_cycle'].by_key()['color'][1])
 
-    plt.plot(rgpackage['r'].to(u.kpc), data['tcool32'].to(u.yr),
-             color=plt.rcParams['axes.prop_cycle'].by_key()['color'][2],
-            label='Cooling Time 3/2', linestyle='--')
-    plt.fill_between(rgpackage['r'].to(u.kpc).value, tcool_lowerbound.value,
-                     tcool_upperbound.value, facecolor='gray', alpha=0.5)
+    #plt.plot(rgpackage['r'].to(u.kpc), data['tcool32'].to(u.yr),
+    #         color=plt.rcParams['axes.prop_cycle'].by_key()['color'][2],
+    #        label='Cooling Time 3/2', linestyle='--')
+    #plt.fill_between(rgpackage['r'].to(u.kpc).value, tcool_lowerbound.value,
+    #                 tcool_upperbound.value, facecolor='gray', alpha=0.5)
+
+    plt.fill_between(rgpackage['r'].to(u.kpc).value, data['tcool52'].to(u.yr).value, data['tcool32'].to(u.yr).value, facecolor='gray', alpha=0.5, label='Enthalpy / Energy difference')
 
     ax = plt.gca()
     ax.set_yscale('log')
@@ -532,6 +536,7 @@ def timescales(data):
     # Plot the freefall time
     plt.plot(rgpackage['r_fine'].to(u.kpc), precip_ratio_fine, label=r't$_{\mathrm{cool}}$ / t$_{\mathrm{freefall}}$')
     ax = plt.gca()
+    ax.set_yscale('log')
     ax.set_xscale('log')
     plt.xlabel("Radius")
     plt.ylabel(r'T')
