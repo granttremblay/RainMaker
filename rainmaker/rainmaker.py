@@ -256,9 +256,10 @@ def logTemp_fit(data):
     """
     whatIsFit = "log temperature profile"
 
-    # The temperature fit should be 2nd order, as a 3rd order
-    # polynomial turns up again at small radii (which is not physical).
-    deg = 3
+    # I think the temperature fit should be 2nd order, as a 3rd order.
+    # This is a change from Mark's code, which fits a 3rd order polynomial
+    # (that then rises sharply at small radii).
+    deg = 2
 
     ln_t = np.log(data['Tx'].value)
     ln_terr = np.log(data['Txerr'] / data['Tx'])
@@ -481,7 +482,8 @@ def timescales(data):
 
     # Electron number density in units of cm**-3
     nelec = pressurepackage['pressure_fit'] / (temppackage['temp_fit'])
-    nelec_fine = pressurepackage['pressure_fit_fine'] / (temppackage['temp_fit_fine'])
+    nelec_fine = pressurepackage[
+        'pressure_fit_fine'] / (temppackage['temp_fit_fine'])
     # See eqn 4 here: https://arxiv.org/pdf/astro-ph/0608423.pdf
 
     # Then the cooling time (via Cavagnolo+08) is
@@ -489,13 +491,15 @@ def timescales(data):
     capital_lambda = coolingFunction(temppackage['temp_fit'])
     capital_lambda_fine = coolingFunction(temppackage['temp_fit_fine'])
 
-
     # What is all of this?! See Eqn. 35 here: See here: arXiv:0706.1274.
-    tcool = (3 / 2) * (1.89 * pressurepackage['pressure_fit']) / (nelec**2 / 1.07) / capital_lambda
-    tcool_fine = (3 / 2) * (1.89 * pressurepackage['pressure_fit_fine']) / (nelec_fine**2 / 1.07) / capital_lambda_fine
-
-    tcool_lowerbound = (data['tcool32'] - data['t32err']).to(u.yr)
-    tcool_upperbound = (data['tcool32'] + data['t32err']).to(u.yr)
+    tcool = ((3 / 2) *
+             (1.89 * pressurepackage['pressure_fit']) / (nelec**2 / 1.07) /
+             capital_lambda
+             )
+    tcool_fine = ((3 / 2) *
+                  (1.89 * pressurepackage['pressure_fit_fine']) /
+                  (nelec_fine**2 / 1.07) / capital_lambda_fine
+                  )
 
     precip_ratio_fine = tcool_fine.to(u.yr) / tff_fine.to(u.yr)
 
@@ -513,13 +517,14 @@ def timescales(data):
     plt.plot(rgpackage['r_fine'].to(u.kpc), (tcool_fine.to(u.yr)), linestyle='--',
              color=plt.rcParams['axes.prop_cycle'].by_key()['color'][1])
 
-    #plt.plot(rgpackage['r'].to(u.kpc), data['tcool32'].to(u.yr),
+    # plt.plot(rgpackage['r'].to(u.kpc), data['tcool32'].to(u.yr),
     #         color=plt.rcParams['axes.prop_cycle'].by_key()['color'][2],
     #        label='Cooling Time 3/2', linestyle='--')
-    #plt.fill_between(rgpackage['r'].to(u.kpc).value, tcool_lowerbound.value,
+    # plt.fill_between(rgpackage['r'].to(u.kpc).value, tcool_lowerbound.value,
     #                 tcool_upperbound.value, facecolor='gray', alpha=0.5)
 
-    plt.fill_between(rgpackage['r'].to(u.kpc).value, data['tcool52'].to(u.yr).value, data['tcool32'].to(u.yr).value, facecolor='gray', alpha=0.5, label='Enthalpy / Energy difference')
+    plt.fill_between(rgpackage['r'].to(u.kpc).value, data['tcool52'].to(u.yr).value, data[
+                     'tcool32'].to(u.yr).value, facecolor='gray', alpha=0.5, label='Enthalpy / Energy difference')
 
     ax = plt.gca()
     ax.set_yscale('log')
@@ -534,7 +539,8 @@ def timescales(data):
     plt.figure()
 
     # Plot the freefall time
-    plt.plot(rgpackage['r_fine'].to(u.kpc), precip_ratio_fine, label=r't$_{\mathrm{cool}}$ / t$_{\mathrm{freefall}}$')
+    plt.plot(rgpackage['r_fine'].to(u.kpc), precip_ratio_fine,
+             label=r't$_{\mathrm{cool}}$ / t$_{\mathrm{freefall}}$')
     ax = plt.gca()
     ax.set_yscale('log')
     ax.set_xscale('log')
