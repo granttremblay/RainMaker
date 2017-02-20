@@ -481,7 +481,7 @@ def timescales(data):
     # See eqn 4 here: https://arxiv.org/pdf/astro-ph/0608423.pdf
 
     # Then the cooling time (via Cavagnolo+08) is
-    # tcool = (3/2 nkT)/(ne np Λ(T,Z))
+    # tcool = (3/2 nkT)/(ne np Lambda(T,Z))
     capital_lambda = coolingFunction(temppackage['temp_fit'])
     capital_lambda_fine = coolingFunction(temppackage['temp_fit_fine'])
 
