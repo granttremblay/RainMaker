@@ -565,7 +565,6 @@ def plotter(x, y, x_fine, fit, fit_fine, lowerbound, upperbound,
 
     plt.figure()
 
-    # Plot data and fits
 
     # Only plot actual data points if I give you data points
     if y is not None:
