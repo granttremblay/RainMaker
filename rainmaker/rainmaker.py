@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-'''
+"""
 Map precipitation thresholds in Chandra X-ray observations of galaxy clusters.
 
 Rainmaker maps the cooling-to-freefall time ratio as a function
@@ -25,7 +25,7 @@ Example:
     $ python rainmaker.py -f accept_main_table.txt -n "Centaurus"
     $ python rainmaker.py -n "Abell 2151"
     $ python rainmaker.py -p False # don't show plots
-'''
+"""
 
 import os
 import time
@@ -55,7 +55,6 @@ __status__ = "Development"
 
 def parse_arguments():
     """Set up and parse command line arguments."""
-
     parser = argparse.ArgumentParser(description="Rainmaker fits ACCEPT profiles to quantify \
                                      parameters relevant to precipitation",
                                      usage="rainmaker.py -f table.txt -n name")
@@ -122,7 +121,7 @@ def parse_data_table(filename, cluster_name):
 
 
 def filter_by_cluster(data, cluster_name):
-    """Takes input astropy TABLE object."""
+    """Take input astropy TABLE object."""
     obs_by_name = data.group_by('Name')
     clusters_in_table = obs_by_name.groups.keys
 
@@ -197,7 +196,6 @@ def fit_polynomial(data, ln_xray_property, deg, whatIsFit):
     from 0th order first to N-th order last (note that this is
     *opposite* from how np.polyfit behaves!).
     """
-
     radiuspackage = extrapolate_radius(data)
 
     r = radiuspackage[0]
@@ -313,7 +311,7 @@ def logPressure_fit(data):
     """
     whatIsFit = "log pressure profile"
 
-    plot_save_file = "pressure.pdf"
+    # plot_save_file = "pressure.pdf"
 
     deg = 3
 
@@ -362,7 +360,7 @@ def logPressure_fit(data):
 
 
 def grav_accel(data):
-    '''Compute the gravitational acceleration from the T and P profiles'''
+    """Compute the gravitational acceleration from the T and P profiles."""
     temppackage = logTemp_fit(data)
     pressurepackage = logPressure_fit(data)
     radiuspackage = extrapolate_radius(data)
@@ -429,7 +427,7 @@ def grav_accel(data):
 
 
 def coolingFunction(kT):
-    '''
+    r"""
     Implement the Tozzi & Norman (2001) cooling function.
 
     This is an analytic fit to Sutherland & Dopita (1993), shown
@@ -441,8 +439,7 @@ def coolingFunction(kT):
     $\Lambda(T) = [C_1 \left( \frac{k_B T}{\mathrm{keV}} \right)^{-1.7}
                   + C_2\left( \frac{k_B T}{\mathrm{keV}} \right)^{0.5}
                   + C_3] \times 10^{-22}$
-    '''
-
+    """
     # For a metallicity of Z = 0.3 Z_solar,
     C1 = 8.6e-3
     C2 = 5.8e-2
@@ -462,12 +459,12 @@ def coolingFunction(kT):
 
 
 def timescales(data):
-    '''
+    """
     Compute the cooling and freefall timescales.
 
     Do this from the log temperature and pressure profiles,
     as well as the Tozzi & Norman cooling function.
-    '''
+    """
     rgpackage, temppackage, pressurepackage, radiuspackage = grav_accel(data)
 
     # Compute the freefall time
@@ -555,7 +552,7 @@ def plotter(x, y, x_fine, fit, fit_fine, lowerbound, upperbound,
             xlog=True, ylog=True, xlim=None, ylim=None,
             xlabel="Set your X-label!", ylabel="Set your y label!",
             title="Set your title!", file="temp.pdf", save=False):
-    '''Plots should be pretty'''
+    """Make plots pretty."""
     style.use('ggplot')
 
     plt.rcParams['font.size'] = 12
@@ -599,7 +596,7 @@ def plotter(x, y, x_fine, fit, fit_fine, lowerbound, upperbound,
 
 
 def make_number_ordinal(number):
-    '''Take number, turn into ordinal. E.g., "2" --> "2nd" '''
+    """Take number, turn into ordinal. E.g., '2' --> '2nd'."""
     suffixes = {1: 'st', 2: 'nd', 3: 'rd'}
 
     if 10 <= number % 100 <= 20:
@@ -611,15 +608,14 @@ def make_number_ordinal(number):
 
 
 def rainmaker_notebook_init(filename, cluster_name):
-    '''Run this in a Jupyter Notebook for exploration'''
+    """Run this in a Jupyter Notebook for exploration."""
     data = parse_data_table(filename, cluster_name.replace(" ", "_").upper())
 
     return data
 
 
 def main():
-    '''The main program runs the whole sequence.'''
-
+    """The main program runs the whole sequence."""
     # Parse command line arguments. Iterate with user if cluster not found.
     filename, cluster_name, show_plots = parse_arguments()
 
